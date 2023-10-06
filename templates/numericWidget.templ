@@ -1,0 +1,57 @@
+package templates
+
+import "goDashboard/models"
+
+templ NumericWidget(title string, value string) {
+	<div class="bg-white p-4 rounded-lg shadow-md">
+		<p class="text-gray-600">{ title }</p>
+		<h2 class="text-3xl font-bold">${ value }</h2>
+	</div>
+}
+
+templ GenericForm(formTitle string, fields []templ.Component, checkbox *models.FormCheckbox, button *models.FormButton) {
+	<div class="mx-auto bg-white p-6 rounded-lg shadow-md">
+		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
+		<form action="#" method="POST">
+			for _, field := range fields {
+				{! field }
+			}
+
+			if checkbox != nil {
+				@FormCheckbox(checkbox)
+			}
+			@FormButton(button)
+		</form>
+	</div>
+}
+
+templ FormField(label string, name string, fieldType string) {
+	<div class="mb-4">
+		<label for={ name } class="block text-sm font-medium text-gray-600">{ label }</label>
+		<input type={ fieldType } id={ name } name={ name } class="mt-1 p-2 w-full border rounded-md"/>
+	</div>
+}
+
+templ SelectFormField(label string, name string, options []string) {
+	<div class="mb-4">
+		<label for={ name } class="block text-sm font-medium text-gray-600">{ label }</label>
+		<select id={ name } name={ name } class="mt-1 p-2 w-full border rounded-md">
+			for _, option := range options {
+				<option>{ option }</option>
+			}
+		</select>
+	</div>
+}
+
+templ FormButton(data *models.FormButton) {
+	<div class="mb-4">
+		<button type="submit" class={ "bg-" + data.Color + "-500 text-white p-2 rounded-md" }>{ data.Label }</button>
+	</div>
+}
+
+templ FormCheckbox(data *models.FormCheckbox) {
+	<div class="mb-4">
+		<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
+		<input type="checkbox" id={ data.Name } name={ data.Name } class="mt-1" />
+    </div>
+}
