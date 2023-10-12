@@ -9,3 +9,21 @@ type FormCheckbox struct {
 	Label string
 	Name  string
 }
+
+type FormField struct {
+	Label     string
+	Name      string
+	FieldType string
+}
+
+type FormSelectField struct {
+	Label   string
+	Name    string
+	Options []string
+}
+
+type UpdateResponse struct {
+	Success bool
+	Message string
+	Title   string
+}

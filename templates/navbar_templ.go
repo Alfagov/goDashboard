@@ -9,7 +9,7 @@ import "context"
 import "io"
 import "bytes"
 
-func header() templ.Component {
+func NavbarWidget() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -22,25 +22,43 @@ func header() templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"></html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		_, err = templBuffer.WriteString("<header class=\"mb-6\"><nav class=\"rounded bg-white p-4 shadow-lg\"><div class=\"flex justify-between\"><a href=\"#\" class=\"text-xl font-bold text-gray-800\">")
 		if err != nil {
 			return err
 		}
-		var_2 := `Form Template`
+		var_2 := `MySaaS`
 		_, err = templBuffer.WriteString(var_2)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</title><link href=\"/compiled.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.6\" integrity=\"sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni\" crossorigin=\"anonymous\">")
+		_, err = templBuffer.WriteString("</a><ul class=\"flex space-x-4\"><li><a href=\"#\" class=\"text-gray-600\">")
 		if err != nil {
 			return err
 		}
-		var_3 := ``
+		var_3 := `Home`
 		_, err = templBuffer.WriteString(var_3)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</script></head>")
+		_, err = templBuffer.WriteString("</a></li><li><a href=\"#\" class=\"text-gray-600\">")
+		if err != nil {
+			return err
+		}
+		var_4 := `Dashboard`
+		_, err = templBuffer.WriteString(var_4)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</a></li><li><a href=\"#\" class=\"text-gray-600\">")
+		if err != nil {
+			return err
+		}
+		var_5 := `Settings`
+		_, err = templBuffer.WriteString(var_5)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</a></li></ul></div></nav></header>")
 		if err != nil {
 			return err
 		}

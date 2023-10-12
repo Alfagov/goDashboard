@@ -10,8 +10,9 @@ import "io"
 import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/layout"
 
-func NumericWidget(title string, value string) templ.Component {
+func NumericWidget(title string, value string, htmx *models.HtmxPoll, widgetLayout *models.WidgetLayout) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -24,12 +25,57 @@ func NumericWidget(title string, value string) templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"bg-white p-4 rounded-lg shadow-md\"><p class=\"text-gray-600\">")
+		var var_2 = []any{layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg"}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_2...)
 		if err != nil {
 			return err
 		}
-		var var_2 string = title
-		_, err = templBuffer.WriteString(templ.EscapeString(var_2))
+		_, err = templBuffer.WriteString("<div class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_2).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" hx-get=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Route))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" hx-trigger=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString("every " + htmx.Interval))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" hx-target=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Target))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" hx-swap=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Swap))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\"><p class=\"text-gray-600\">")
+		if err != nil {
+			return err
+		}
+		var var_3 string = title
+		_, err = templBuffer.WriteString(templ.EscapeString(var_3))
 		if err != nil {
 			return err
 		}
@@ -37,13 +83,13 @@ func NumericWidget(title string, value string) templ.Component {
 		if err != nil {
 			return err
 		}
-		var_3 := `$`
-		_, err = templBuffer.WriteString(var_3)
+		var_4 := `$`
+		_, err = templBuffer.WriteString(var_4)
 		if err != nil {
 			return err
 		}
-		var var_4 string = value
-		_, err = templBuffer.WriteString(templ.EscapeString(var_4))
+		var var_5 string = value
+		_, err = templBuffer.WriteString(templ.EscapeString(var_5))
 		if err != nil {
 			return err
 		}
@@ -58,7 +104,7 @@ func NumericWidget(title string, value string) templ.Component {
 	})
 }
 
-func GenericForm(formTitle string, fields []templ.Component, checkbox *models.FormCheckbox, button *models.FormButton) templ.Component {
+func GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -66,17 +112,30 @@ func GenericForm(formTitle string, fields []templ.Component, checkbox *models.Fo
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_5 := templ.GetChildren(ctx)
-		if var_5 == nil {
-			var_5 = templ.NopComponent
+		var_6 := templ.GetChildren(ctx)
+		if var_6 == nil {
+			var_6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"mx-auto bg-white p-6 rounded-lg shadow-md\"><h2 class=\"text-2xl font-bold mb-4\">")
+		var var_7 = []any{layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg"}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_7...)
 		if err != nil {
 			return err
 		}
-		var var_6 string = formTitle
-		_, err = templBuffer.WriteString(templ.EscapeString(var_6))
+		_, err = templBuffer.WriteString("<div class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_7).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\"><h2 class=\"text-2xl font-bold mb-4\">")
+		if err != nil {
+			return err
+		}
+		var var_8 string = formTitle
+		_, err = templBuffer.WriteString(templ.EscapeString(var_8))
 		if err != nil {
 			return err
 		}
@@ -90,15 +149,17 @@ func GenericForm(formTitle string, fields []templ.Component, checkbox *models.Fo
 				return err
 			}
 		}
-		if checkbox != nil {
-			err = FormCheckbox(checkbox).Render(ctx, templBuffer)
+		for _, chk := range checkbox {
+			err = FormCheckbox(chk).Render(ctx, templBuffer)
 			if err != nil {
 				return err
 			}
 		}
-		err = FormButton(button).Render(ctx, templBuffer)
-		if err != nil {
-			return err
+		for _, btn := range button {
+			err = FormButton(btn).Render(ctx, templBuffer)
+			if err != nil {
+				return err
+			}
 		}
 		_, err = templBuffer.WriteString("</form></div>")
 		if err != nil {
@@ -111,7 +172,7 @@ func GenericForm(formTitle string, fields []templ.Component, checkbox *models.Fo
 	})
 }
 
-func FormField(label string, name string, fieldType string) templ.Component {
+func FormField(data *models.FormField) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -119,16 +180,16 @@ func FormField(label string, name string, fieldType string) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_7 := templ.GetChildren(ctx)
-		if var_7 == nil {
-			var_7 = templ.NopComponent
+		var_9 := templ.GetChildren(ctx)
+		if var_9 == nil {
+			var_9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, err = templBuffer.WriteString("<div class=\"mb-4\"><label for=\"")
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(name))
+		_, err = templBuffer.WriteString(templ.EscapeString(data.Name))
 		if err != nil {
 			return err
 		}
@@ -136,8 +197,8 @@ func FormField(label string, name string, fieldType string) templ.Component {
 		if err != nil {
 			return err
 		}
-		var var_8 string = label
-		_, err = templBuffer.WriteString(templ.EscapeString(var_8))
+		var var_10 string = data.Label
+		_, err = templBuffer.WriteString(templ.EscapeString(var_10))
 		if err != nil {
 			return err
 		}
@@ -145,7 +206,7 @@ func FormField(label string, name string, fieldType string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(fieldType))
+		_, err = templBuffer.WriteString(templ.EscapeString(data.FieldType))
 		if err != nil {
 			return err
 		}
@@ -153,7 +214,7 @@ func FormField(label string, name string, fieldType string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(name))
+		_, err = templBuffer.WriteString(templ.EscapeString(data.Name))
 		if err != nil {
 			return err
 		}
@@ -161,7 +222,7 @@ func FormField(label string, name string, fieldType string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(name))
+		_, err = templBuffer.WriteString(templ.EscapeString(data.Name))
 		if err != nil {
 			return err
 		}
@@ -184,9 +245,9 @@ func SelectFormField(label string, name string, options []string) templ.Componen
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_9 := templ.GetChildren(ctx)
-		if var_9 == nil {
-			var_9 = templ.NopComponent
+		var_11 := templ.GetChildren(ctx)
+		if var_11 == nil {
+			var_11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, err = templBuffer.WriteString("<div class=\"mb-4\"><label for=\"")
@@ -201,8 +262,8 @@ func SelectFormField(label string, name string, options []string) templ.Componen
 		if err != nil {
 			return err
 		}
-		var var_10 string = label
-		_, err = templBuffer.WriteString(templ.EscapeString(var_10))
+		var var_12 string = label
+		_, err = templBuffer.WriteString(templ.EscapeString(var_12))
 		if err != nil {
 			return err
 		}
@@ -231,8 +292,8 @@ func SelectFormField(label string, name string, options []string) templ.Componen
 			if err != nil {
 				return err
 			}
-			var var_11 string = option
-			_, err = templBuffer.WriteString(templ.EscapeString(var_11))
+			var var_13 string = option
+			_, err = templBuffer.WriteString(templ.EscapeString(var_13))
 			if err != nil {
 				return err
 			}
@@ -260,17 +321,17 @@ func FormButton(data *models.FormButton) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_12 := templ.GetChildren(ctx)
-		if var_12 == nil {
-			var_12 = templ.NopComponent
+		var_14 := templ.GetChildren(ctx)
+		if var_14 == nil {
+			var_14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, err = templBuffer.WriteString("<div class=\"mb-4\">")
 		if err != nil {
 			return err
 		}
-		var var_13 = []any{"bg-" + data.Color + "-500 text-white p-2 rounded-md"}
-		err = templ.RenderCSSItems(ctx, templBuffer, var_13...)
+		var var_15 = []any{"bg-" + data.Color + "-500 text-white p-2 rounded-md"}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_15...)
 		if err != nil {
 			return err
 		}
@@ -278,7 +339,7 @@ func FormButton(data *models.FormButton) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_13).String()))
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_15).String()))
 		if err != nil {
 			return err
 		}
@@ -286,8 +347,8 @@ func FormButton(data *models.FormButton) templ.Component {
 		if err != nil {
 			return err
 		}
-		var var_14 string = data.Label
-		_, err = templBuffer.WriteString(templ.EscapeString(var_14))
+		var var_16 string = data.Label
+		_, err = templBuffer.WriteString(templ.EscapeString(var_16))
 		if err != nil {
 			return err
 		}
@@ -310,9 +371,9 @@ func FormCheckbox(data *models.FormCheckbox) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_15 := templ.GetChildren(ctx)
-		if var_15 == nil {
-			var_15 = templ.NopComponent
+		var_17 := templ.GetChildren(ctx)
+		if var_17 == nil {
+			var_17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, err = templBuffer.WriteString("<div class=\"mb-4\"><label for=\"")
@@ -327,8 +388,8 @@ func FormCheckbox(data *models.FormCheckbox) templ.Component {
 		if err != nil {
 			return err
 		}
-		var var_16 string = data.Label
-		_, err = templBuffer.WriteString(templ.EscapeString(var_16))
+		var var_18 string = data.Label
+		_, err = templBuffer.WriteString(templ.EscapeString(var_18))
 		if err != nil {
 			return err
 		}

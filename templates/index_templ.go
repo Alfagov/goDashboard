@@ -9,7 +9,7 @@ import "context"
 import "io"
 import "bytes"
 
-func header() templ.Component {
+func IndexPage(body templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -22,25 +22,11 @@ func header() templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"></html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		err = header().Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		var_2 := `Form Template`
-		_, err = templBuffer.WriteString(var_2)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</title><link href=\"/compiled.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.6\" integrity=\"sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni\" crossorigin=\"anonymous\">")
-		if err != nil {
-			return err
-		}
-		var_3 := ``
-		_, err = templBuffer.WriteString(var_3)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</script></head>")
+		err = body.Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}

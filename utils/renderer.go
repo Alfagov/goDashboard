@@ -3,7 +3,7 @@ package utils
 import (
 	"context"
 	"github.com/a-h/templ"
-	"github.com/gin-gonic/gin/render"
+	"io"
 	"net/http"
 )
 
@@ -12,25 +12,28 @@ type TemplRender struct {
 	Data templ.Component
 }
 
-func (t TemplRender) Render(w http.ResponseWriter) error {
-	w.WriteHeader(t.Code)
-	if t.Data != nil {
-		return t.Data.Render(context.Background(), w)
+func (t TemplRender) Render(
+	w io.Writer, n string, data interface{},
+	l ...string,
+) error {
+
+	d, ok := data.(templ.Component)
+	if !ok {
+		return nil
 	}
 
+	if d == nil {
+		return nil
+	}
+
+	return d.Render(context.Background(), w)
+
+}
+
+func (t TemplRender) Load() error {
 	return nil
 }
 
 func (t TemplRender) WriteContentType(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-}
-
-func (t *TemplRender) Instance(name string, data interface{}) render.Render {
-	if templData, ok := data.(templ.Component); ok {
-		return &TemplRender{
-			Code: http.StatusOK,
-			Data: templData,
-		}
-	}
-	return nil
 }

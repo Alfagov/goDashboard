@@ -1,34 +1,44 @@
 package templates
 
-import "goDashboard/models"
+import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/layout"
 
-templ NumericWidget(title string, value string) {
-	<div class="bg-white p-4 rounded-lg shadow-md">
+templ NumericWidget(title string, value string, htmx *models.HtmxPoll, widgetLayout *models.WidgetLayout) {
+	<div
+			class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg"}
+			hx-get={htmx.Route}
+			hx-trigger={"every " + htmx.Interval}
+			hx-target={ htmx.Target }
+			hx-swap={htmx.Swap}>
 		<p class="text-gray-600">{ title }</p>
 		<h2 class="text-3xl font-bold">${ value }</h2>
 	</div>
 }
 
-templ GenericForm(formTitle string, fields []templ.Component, checkbox *models.FormCheckbox, button *models.FormButton) {
-	<div class="mx-auto bg-white p-6 rounded-lg shadow-md">
+templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout) {
+	<div class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg"}>
 		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
 		<form action="#" method="POST">
 			for _, field := range fields {
 				{! field }
 			}
 
-			if checkbox != nil {
-				@FormCheckbox(checkbox)
+			for _, chk := range checkbox {
+				@FormCheckbox(chk)
 			}
-			@FormButton(button)
+
+			for _, btn := range button {
+				@FormButton(btn)
+			}
+
 		</form>
 	</div>
 }
 
-templ FormField(label string, name string, fieldType string) {
+templ FormField(data *models.FormField) {
 	<div class="mb-4">
-		<label for={ name } class="block text-sm font-medium text-gray-600">{ label }</label>
-		<input type={ fieldType } id={ name } name={ name } class="mt-1 p-2 w-full border rounded-md"/>
+		<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
+		<input type={ data.FieldType } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
 	</div>
 }
 
