@@ -9,7 +9,7 @@ import "context"
 import "io"
 import "bytes"
 
-func GridPage(widgets []templ.Component, aside bool) templ.Component {
+func GridPage(widgets []templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -22,56 +22,11 @@ func GridPage(widgets []templ.Component, aside bool) templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<body class=\"bg-gray-100 h-screen font-sans\"><div class=\"container mx-auto p-4 h-full\">")
-		if err != nil {
-			return err
-		}
-		err = NavbarWidget().Render(ctx, templBuffer)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("<main class=\"grid h-full grid-cols-4 grid-rows-6 gap-6\">")
-		if err != nil {
-			return err
-		}
-		if aside {
-			err = Aside().Render(ctx, templBuffer)
+		for _, widget := range widgets {
+			err = widget.Render(ctx, templBuffer)
 			if err != nil {
 				return err
 			}
-			_, err = templBuffer.WriteString(" <section class=\"col-span-3 rounded p-4\"><div class=\"grid grid-cols-3 gap-4\">")
-			if err != nil {
-				return err
-			}
-			for _, widget := range widgets {
-				err = widget.Render(ctx, templBuffer)
-				if err != nil {
-					return err
-				}
-			}
-			_, err = templBuffer.WriteString("</div></section>")
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err = templBuffer.WriteString("<section class=\"col-span-4 rounded p-4\"><div class=\"grid grid-cols-4 gap-4\">")
-			if err != nil {
-				return err
-			}
-			for _, widget := range widgets {
-				err = widget.Render(ctx, templBuffer)
-				if err != nil {
-					return err
-				}
-			}
-			_, err = templBuffer.WriteString("</div></section>")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString("</main></div></body>")
-		if err != nil {
-			return err
 		}
 		if !templIsBuffer {
 			_, err = templBuffer.WriteTo(w)

@@ -9,7 +9,9 @@ import "context"
 import "io"
 import "bytes"
 
-func Aside() templ.Component {
+import "github.com/Alfagov/goDashboard/models"
+
+func Aside(descriptor []models.PagesDescriptor) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -31,43 +33,34 @@ func Aside() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</h2><ul><li class=\"mb-2\"><a href=\"#\" class=\"text-gray-700\">")
+		_, err = templBuffer.WriteString("</h2><ul>")
 		if err != nil {
 			return err
 		}
-		var_3 := `Overview`
-		_, err = templBuffer.WriteString(var_3)
-		if err != nil {
-			return err
+		for _, page := range descriptor {
+			_, err = templBuffer.WriteString("<li class=\"mb-2\"><a hx-target=\"#page-content\" hx-get=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(page.Route))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\" hx-swap=\"outerHTML\" hx-select=\"#page-content\" class=\"text-gray-700\">")
+			if err != nil {
+				return err
+			}
+			var var_3 string = page.Name
+			_, err = templBuffer.WriteString(templ.EscapeString(var_3))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</a></li>")
+			if err != nil {
+				return err
+			}
 		}
-		_, err = templBuffer.WriteString("</a></li><li class=\"mb-2\"><a href=\"#\" class=\"text-gray-700\">")
-		if err != nil {
-			return err
-		}
-		var_4 := `Analytics`
-		_, err = templBuffer.WriteString(var_4)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</a></li><li class=\"mb-2\"><a href=\"#\" class=\"text-gray-700\">")
-		if err != nil {
-			return err
-		}
-		var_5 := `Users`
-		_, err = templBuffer.WriteString(var_5)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</a></li><li class=\"mb-2\"><a href=\"#\" class=\"text-gray-700\">")
-		if err != nil {
-			return err
-		}
-		var_6 := `Settings`
-		_, err = templBuffer.WriteString(var_6)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</a></li></ul></aside>")
+		_, err = templBuffer.WriteString("</ul></aside>")
 		if err != nil {
 			return err
 		}

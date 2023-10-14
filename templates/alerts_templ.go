@@ -22,7 +22,7 @@ func ErrorAlert(title string, message string) templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div role=\"alert\"><div class=\"bg-red-500 text-white font-bold rounded-t px-4 py-2\">")
+		_, err = templBuffer.WriteString("<div role=\"alert\" class=\"mb-2\" _=\"on load transition my opacity to 0 over 4s then remove me\"><div class=\"bg-red-500 text-white font-bold rounded-t px-4 py-2  flex justify-between items-center\">")
 		if err != nil {
 			return err
 		}
@@ -31,12 +31,21 @@ func ErrorAlert(title string, message string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div><div class=\"border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700\"><p>")
+		_, err = templBuffer.WriteString(" <button class=\"ml-4 rounded hover:bg-red-600 p-1\" _=\"on click transition my opacity to 0 then remove me\">")
 		if err != nil {
 			return err
 		}
-		var var_3 string = message
-		_, err = templBuffer.WriteString(templ.EscapeString(var_3))
+		var_3 := `X`
+		_, err = templBuffer.WriteString(var_3)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</button></div><div class=\"border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700\"><p>")
+		if err != nil {
+			return err
+		}
+		var var_4 string = message
+		_, err = templBuffer.WriteString(templ.EscapeString(var_4))
 		if err != nil {
 			return err
 		}
@@ -59,26 +68,35 @@ func SuccessAlert(title string, message string) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_4 := templ.GetChildren(ctx)
-		if var_4 == nil {
-			var_4 = templ.NopComponent
+		var_5 := templ.GetChildren(ctx)
+		if var_5 == nil {
+			var_5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div role=\"alert\"><div class=\"bg-green-500 text-white font-bold rounded-t px-4 py-2\">")
+		_, err = templBuffer.WriteString("<div role=\"alert\" class=\"mb-2\" _=\"on load transition my opacity to 0 over 4s then remove me\"><div class=\"bg-green-500 text-white font-bold rounded-t px-4 py-2  flex justify-between items-center\">")
 		if err != nil {
 			return err
 		}
-		var var_5 string = title
-		_, err = templBuffer.WriteString(templ.EscapeString(var_5))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</div><div class=\"border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700\"><p>")
-		if err != nil {
-			return err
-		}
-		var var_6 string = message
+		var var_6 string = title
 		_, err = templBuffer.WriteString(templ.EscapeString(var_6))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" <button class=\"ml-4 rounded hover:bg-red-600 p-1\" _=\"on click transition my opacity to 0 then remove me\">")
+		if err != nil {
+			return err
+		}
+		var_7 := `X`
+		_, err = templBuffer.WriteString(var_7)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</button></div><div class=\"border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700\"><p>")
+		if err != nil {
+			return err
+		}
+		var var_8 string = message
+		_, err = templBuffer.WriteString(templ.EscapeString(var_8))
 		if err != nil {
 			return err
 		}

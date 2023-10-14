@@ -1,13 +1,17 @@
 package templates
 
-templ Aside() {
-    <aside class="col-span-1 row-start-1 row-end-6 rounded bg-white p-4 shadow-lg">
-        <h2 class="mb-4 text-lg font-semibold">Menu</h2>
-        <ul>
-            <li class="mb-2"><a href="#" class="text-gray-700">Overview</a></li>
-            <li class="mb-2"><a href="#" class="text-gray-700">Analytics</a></li>
-            <li class="mb-2"><a href="#" class="text-gray-700">Users</a></li>
-            <li class="mb-2"><a href="#" class="text-gray-700">Settings</a></li>
-        </ul>
-    </aside>
+import "github.com/Alfagov/goDashboard/models"
+
+templ Aside(descriptor []models.PagesDescriptor) {
+	<aside class="col-span-1 row-start-1 row-end-6 rounded bg-white p-4 shadow-lg">
+		<h2 class="mb-4 text-lg font-semibold">Menu</h2>
+		<ul>
+			for _, page := range descriptor {
+				<li class="mb-2">
+					<a hx-target="#page-content" hx-get={ page.Route } hx-swap="outerHTML" hx-select="#page-content" class="text-gray-700">{ page.Name }</a>
+				</li>
+			}
+		</ul>
+	</aside>
 }
+

@@ -14,12 +14,12 @@ type BaseWidget struct {
 
 type Widget interface {
 	setName(name string)
-	withLayout(layout *models.WidgetLayout)
 	setHeight(height int)
 	setWidth(width int)
 	setId()
 	setDescription(description string)
 	setRow(row int)
 	setColumn(column int)
+	withLayout(layout *models.WidgetLayout)
 	GetRow() int
 }
