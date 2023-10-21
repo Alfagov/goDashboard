@@ -1,33 +1,33 @@
-package widgets
+package numeric
 
 func SetNumericUpdateHandler(handler func() (int, error)) func(
-	f NumericWidget,
+	f Numeric,
 ) {
-	return func(f NumericWidget) {
+	return func(f Numeric) {
 		f.setUpdateHandler(handler)
 	}
 }
 
 func SetNumericInitValue(value int) func(
-	f NumericWidget,
+	f Numeric,
 ) {
-	return func(f NumericWidget) {
+	return func(f Numeric) {
 		f.setInitialValue(value)
 	}
 }
 
 func SetNumericUnit(unit string) func(
-	f NumericWidget,
+	f Numeric,
 ) {
-	return func(f NumericWidget) {
+	return func(f Numeric) {
 		f.setUnit(unit)
 	}
 }
 
 func SetNumericUnitAfter() func(
-	f NumericWidget,
+	f Numeric,
 ) {
-	return func(f NumericWidget) {
+	return func(f Numeric) {
 		f.withUnitAfter()
 	}
 }

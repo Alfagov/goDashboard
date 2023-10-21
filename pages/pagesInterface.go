@@ -1,29 +1,29 @@
 package pages
 
 import (
+	"github.com/Alfagov/goDashboard/pkg/form"
+	"github.com/Alfagov/goDashboard/pkg/graphContainer"
+	"github.com/Alfagov/goDashboard/pkg/numeric"
 	"github.com/Alfagov/goDashboard/templates"
-	"github.com/Alfagov/goDashboard/widgets"
 	"github.com/a-h/templ"
 )
 
 type page struct {
-	Name           string
-	PageRoute      string
-	NumericWidgets []widgets.NumericWidget
-	FormWidgets    []widgets.FormWidget
-	BarGraphWidget []widgets.BarGraphWidget
+	Name      string
+	PageRoute string
+	Widgets   *WidgetsContainer
 }
 
 type WidgetsContainer struct {
-	NumericWidgets []widgets.NumericWidget
-	FormWidgets    []widgets.FormWidget
-	BarGraphWidget []widgets.BarGraphWidget
+	NumericWidgets []numeric.Numeric
+	FormWidgets    []form.FormWidget
+	GraphWidgets   []graphContainer.GraphWidget
 }
 
 type Page interface {
-	addNumericWidgets(widget widgets.NumericWidget)
-	addFormWidgets(widget widgets.FormWidget)
-	addGraphBarWidget(widget widgets.BarGraphWidget)
+	addNumericWidgets(widget numeric.Numeric)
+	addFormWidgets(widget form.FormWidget)
+	addGraphWidget(widget graphContainer.GraphWidget)
 	setName(name string)
 	Encode() templ.Component
 	GetWidgets() *WidgetsContainer
@@ -44,6 +44,13 @@ func NewPage(setters ...func(p Page)) Page {
 	return &p
 }
 
+func (p *page) addGraphWidget(widget graphContainer.GraphWidget) {
+	htm := widget.GetHtmx()
+	htm.SetRoute(p.Name + htm.GetRoute())
+
+	p.Widgets.GraphWidgets = append(p.Widgets.GraphWidgets, widget)
+}
+
 func (p *page) SetRoute(route string) {
 	p.PageRoute = route
 }
@@ -57,44 +64,39 @@ func (p *page) GetRoute() string {
 }
 
 func (p *page) GetWidgets() *WidgetsContainer {
-	return &WidgetsContainer{
-		NumericWidgets: p.NumericWidgets,
-		FormWidgets:    p.FormWidgets,
-		BarGraphWidget: p.BarGraphWidget,
-	}
+	return p.Widgets
 }
 
 func (p *page) setName(name string) {
 	p.Name = name
 }
 
-func (p *page) addNumericWidgets(widget widgets.NumericWidget) {
-	widget.SetPageRoute(p.Name)
-	p.NumericWidgets = append(p.NumericWidgets, widget)
+func (p *page) addNumericWidgets(widget numeric.Numeric) {
+	htm := widget.GetHtmx()
+	htm.SetRoute(p.Name + htm.GetRoute())
+
+	p.Widgets.NumericWidgets = append(p.Widgets.NumericWidgets, widget)
 }
 
-func (p *page) addFormWidgets(widget widgets.FormWidget) {
-	widget.SetPageRoute(p.Name)
-	p.FormWidgets = append(p.FormWidgets, widget)
-}
+func (p *page) addFormWidgets(widget form.FormWidget) {
+	htm := widget.GetHtmx()
+	htm.SetRoute(p.Name + htm.GetRoute())
 
-func (p *page) addGraphBarWidget(widget widgets.BarGraphWidget) {
-	// TODO: SET PAGE ROUTE
-	p.BarGraphWidget = append(p.BarGraphWidget, widget)
+	p.Widgets.FormWidgets = append(p.Widgets.FormWidgets, widget)
 }
 
 func (p *page) Encode() templ.Component {
 	var components []templ.Component
 
-	for _, widget := range p.NumericWidgets {
+	for _, widget := range p.Widgets.NumericWidgets {
 		components = append(components, widget.Encode())
 	}
 
-	for _, widget := range p.FormWidgets {
+	for _, widget := range p.Widgets.FormWidgets {
 		components = append(components, widget.Encode())
 	}
 
-	for _, widget := range p.BarGraphWidget {
+	for _, widget := range p.Widgets.GraphWidgets {
 		components = append(components, widget.Encode())
 	}
 
@@ -103,7 +105,7 @@ func (p *page) Encode() templ.Component {
 	return pageOut
 }
 
-func AddNumericWidgets(widgets ...widgets.NumericWidget) func(p Page) {
+func AddNumericWidgets(widgets ...numeric.Numeric) func(p Page) {
 	return func(p Page) {
 		for _, widget := range widgets {
 			p.addNumericWidgets(widget)
@@ -111,7 +113,7 @@ func AddNumericWidgets(widgets ...widgets.NumericWidget) func(p Page) {
 	}
 }
 
-func AddFormWidgets(widgets ...widgets.FormWidget) func(p Page) {
+func AddFormWidgets(widgets ...form.FormWidget) func(p Page) {
 	return func(p Page) {
 		for _, widget := range widgets {
 			p.addFormWidgets(widget)
@@ -119,10 +121,10 @@ func AddFormWidgets(widgets ...widgets.FormWidget) func(p Page) {
 	}
 }
 
-func AddBarGraphWidgets(widgets ...widgets.BarGraphWidget) func(p Page) {
+func AddGraphWidgets(widgets ...graphContainer.GraphWidget) func(p Page) {
 	return func(p Page) {
 		for _, widget := range widgets {
-			p.addGraphBarWidget(widget)
+			p.addGraphWidget(widget)
 		}
 	}
 }

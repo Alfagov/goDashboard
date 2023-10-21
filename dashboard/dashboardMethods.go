@@ -17,3 +17,12 @@ func (d *dashboard) Compile() {
 	createContainerPagesRoutes(d.Router, d.PageContainers)
 	createPagesRoutes(d.Router, d.Pages, nil)
 }
+
+func (d *dashboard) Run() error {
+	d.Router.Static("/", "./css")
+	d.Router.Static("/", "./js")
+
+	d.Compile()
+
+	return d.Router.Listen(":8080")
+}

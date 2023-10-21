@@ -1,32 +1,14 @@
-package widgets
+package form
 
 import (
-	"dario.cat/mergo"
+	"github.com/Alfagov/goDashboard/htmx"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
-	"github.com/oklog/ulid/v2"
 )
 
 func (fw *formWidget) HandlePost(c FormRequest) *models.UpdateResponse {
 	return fw.updateHandler(c)
-}
-
-func (fw *formWidget) SetPageRoute(route string) {
-	r := route + "/update/" + fw.baseWidget.Id
-	fw.htmx.Route = r
-}
-
-func (fw *formWidget) GetRoute() string {
-	return fw.htmx.Route
-}
-
-func (fw *formWidget) withLayout(layout *models.WidgetLayout) {
-
-	err := mergo.Merge(fw.baseWidget.Layout, layout, mergo.WithOverride)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (fw *formWidget) addFormFields(field ...*models.FormField) {
@@ -48,42 +30,12 @@ func (fw *formWidget) setUpdateHandler(
 	fw.updateHandler = handler
 }
 
-func (fw *formWidget) setName(name string) {
-	fw.baseWidget.Name = name
-}
-
-func (fw *formWidget) setHeight(height int) {
-	fw.baseWidget.Layout.Height = height
-}
-
-func (fw *formWidget) setWidth(width int) {
-	fw.baseWidget.Layout.Width = width
-}
-
-func (fw *formWidget) setRow(row int) {
-	fw.baseWidget.Layout.Row = row
-}
-
-func (fw *formWidget) setColumn(column int) {
-	fw.baseWidget.Layout.Column = column
-}
-
-func (fw *formWidget) GetRow() int {
-	return fw.baseWidget.Layout.Row
-}
-
-func (fw *formWidget) setId() {
-	uld := ulid.Make()
-	id := "formWidget_" + fw.baseWidget.Name + "_" + uld.String()
-	fw.baseWidget.Id = id
-}
-
-func (fw *formWidget) setDescription(description string) {
-	fw.baseWidget.Description = description
-}
-
 func (fw *formWidget) setInitialValue(value models.UpdateResponse) {
 	fw.initialValue = value
+}
+
+func (fw *formWidget) GetHtmx() htmx.HTMX {
+	return fw.htmxOpts
 }
 
 func (fw *formWidget) UpdateAction(data *models.UpdateResponse) templ.Component {
@@ -97,7 +49,7 @@ func (fw *formWidget) UpdateAction(data *models.UpdateResponse) templ.Component 
 	return element
 }
 
-func (fw *formWidget) WithFormSpecs(
+func (fw *formWidget) WithSettings(
 	settings ...func(
 		f FormWidget,
 	),
@@ -120,12 +72,12 @@ func (fw *formWidget) Encode() templ.Component {
 	}
 
 	element := templates.GenericForm(
-		fw.baseWidget.Name,
+		fw.baseWidget.GetName(),
 		fieldsComponent,
 		checkboxes,
 		buttons,
-		fw.baseWidget.Layout,
-		&fw.htmx,
+		fw.baseWidget.GetLayout(),
+		fw.htmxOpts.GetHtmx(),
 	)
 
 	return element

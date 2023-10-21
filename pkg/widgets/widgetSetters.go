@@ -4,7 +4,7 @@ import "github.com/Alfagov/goDashboard/models"
 
 func SetName(name string) func(f Widget) {
 	return func(f Widget) {
-		f.setName(name)
+		f.SetName(name)
 	}
 }
 

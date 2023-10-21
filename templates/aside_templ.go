@@ -38,7 +38,7 @@ func Aside(descriptor []models.PagesDescriptor) templ.Component {
 			return err
 		}
 		for _, page := range descriptor {
-			_, err = templBuffer.WriteString("<li class=\"mb-2\"><a hx-target=\"#page-content\" hx-get=\"")
+			_, err = templBuffer.WriteString("<li class=\"mb-2\"><a onclick=\"disposeAllCharts()\" hx-target=\"#page-content\" hx-get=\"")
 			if err != nil {
 				return err
 			}

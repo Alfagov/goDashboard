@@ -95,11 +95,18 @@ func (p *pageContainer) AddPage(page pages.Page) {
 
 	widgets := page.GetWidgets()
 	for _, widget := range widgets.NumericWidgets {
-		widget.SetPageRoute(page.GetRoute())
+		htm := widget.GetHtmx()
+		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
 	}
 
 	for _, widget := range widgets.FormWidgets {
-		widget.SetPageRoute(page.GetRoute())
+		htm := widget.GetHtmx()
+		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
+	}
+
+	for _, widget := range widgets.GraphWidgets {
+		htm := widget.GetHtmx()
+		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
 	}
 
 	p.Pages[page.GetName()] = page

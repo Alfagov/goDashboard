@@ -1,9 +1,10 @@
 package templates
 
 import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/htmx"
 import "github.com/Alfagov/goDashboard/layout"
 
-templ NumericWidget(title string, value string, unit string, unitAfter bool, htmx *models.HtmxPoll, widgetLayout *models.WidgetLayout) {
+templ NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *models.WidgetLayout) {
 	<div
  		class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }
  		hx-get={ htmx.Route }
@@ -21,7 +22,7 @@ templ NumericWidget(title string, value string, unit string, unitAfter bool, htm
 	</div>
 }
 
-templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout, htmx *models.HtmxPoll) {
+templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout, htmx *htmx.Htmx) {
 	<div class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }>
 		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
 		<div id="form-error"></div>

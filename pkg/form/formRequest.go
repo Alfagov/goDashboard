@@ -1,4 +1,4 @@
-package widgets
+package form
 
 import "github.com/gofiber/fiber/v2"
 

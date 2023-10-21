@@ -10,9 +10,10 @@ import "io"
 import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/htmx"
 import "github.com/Alfagov/goDashboard/layout"
 
-func NumericWidget(title string, value string, unit string, unitAfter bool, htmx *models.HtmxPoll, widgetLayout *models.WidgetLayout) templ.Component {
+func NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *models.WidgetLayout) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -133,7 +134,7 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 	})
 }
 
-func GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout, htmx *models.HtmxPoll) templ.Component {
+func GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout, htmx *htmx.Htmx) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {

@@ -3,8 +3,8 @@ package dashboard
 import (
 	"github.com/Alfagov/goDashboard/pageContainer"
 	"github.com/Alfagov/goDashboard/pages"
+	"github.com/Alfagov/goDashboard/pkg/form"
 	"github.com/Alfagov/goDashboard/templates"
-	"github.com/Alfagov/goDashboard/widgets"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 )
@@ -53,7 +53,7 @@ func createPagesRoutes(
 		for _, widget := range widgetList.NumericWidgets {
 			w := widget
 			router.Get(
-				w.GetRoute(), func(c *fiber.Ctx) error {
+				w.GetHtmx().GetRoute(), func(c *fiber.Ctx) error {
 					update, err := w.HandleUpdate()
 					if err != nil {
 						return err
@@ -69,12 +69,23 @@ func createPagesRoutes(
 		for _, widget := range widgetList.FormWidgets {
 			w := widget
 			router.Post(
-				w.GetRoute(), func(c *fiber.Ctx) error {
-					update := w.HandlePost(widgets.NewFormRequest(c))
+				w.GetHtmx().GetRoute(), func(c *fiber.Ctx) error {
+					update := w.HandlePost(form.NewFormRequest(c))
 
 					t := w.UpdateAction(update)
 
 					return c.Render("", t)
+				},
+			)
+		}
+
+		for _, widget := range widgetList.GraphWidgets {
+			w := widget
+			router.Get(
+				w.GetHtmx().GetRoute(), func(c *fiber.Ctx) error {
+					t := w.Update()
+
+					return c.JSON(t)
 				},
 			)
 		}

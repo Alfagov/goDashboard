@@ -1,4 +1,4 @@
-package widgets
+package form
 
 import "github.com/Alfagov/goDashboard/models"
 

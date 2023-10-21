@@ -49,12 +49,30 @@ func header() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</script><script src=\"https://go-echarts.github.io/go-echarts-assets/assets/echarts.min.js\">")
+		_, err = templBuffer.WriteString("</script><script src=\"/extensions.js\">")
 		if err != nil {
 			return err
 		}
 		var_5 := ``
 		_, err = templBuffer.WriteString(var_5)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script><script src=\"/chartManager.js\">")
+		if err != nil {
+			return err
+		}
+		var_6 := ``
+		_, err = templBuffer.WriteString(var_6)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script><script src=\"https://go-echarts.github.io/go-echarts-assets/assets/echarts.min.js\">")
+		if err != nil {
+			return err
+		}
+		var_7 := ``
+		_, err = templBuffer.WriteString(var_7)
 		if err != nil {
 			return err
 		}
