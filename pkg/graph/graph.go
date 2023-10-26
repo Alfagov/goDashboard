@@ -9,7 +9,7 @@ import (
 )
 
 type Graph interface {
-	Encode() templ.Component
+	Encode(height int) templ.Component
 	HandleUpdate() map[string]interface{}
 	WithToolboxOpts(toolboxOpts toolbox.Toolbox) Graph
 	GetId() string
@@ -51,7 +51,7 @@ func NewBarGraph(
 	}
 }
 
-func (bg *barGraphImpl) Encode() templ.Component {
+func (bg *barGraphImpl) Encode(h int) templ.Component {
 	g := barGraphFromData(bg.dataHandler(), bg.stacked)
 	g.ChartID = bg.Id
 	if bg.tBox != nil {
@@ -60,10 +60,10 @@ func (bg *barGraphImpl) Encode() templ.Component {
 		)
 	}
 
-	return templComponentGraph(g, g.Validate)
+	return templComponentGraph(g, h, g.Validate)
 }
 
-func (lg *lineGraphImpl) Encode() templ.Component {
+func (lg *lineGraphImpl) Encode(h int) templ.Component {
 	g := lineGraphFromData(lg.dataHandler(), false)
 	g.ChartID = lg.Id
 	if lg.tBox != nil {
@@ -72,7 +72,7 @@ func (lg *lineGraphImpl) Encode() templ.Component {
 		)
 	}
 
-	return templComponentGraph(g, g.Validate)
+	return templComponentGraph(g, h, g.Validate)
 }
 
 func (bg *barGraphImpl) HandleUpdate() map[string]interface{} {

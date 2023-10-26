@@ -1,15 +1,18 @@
-package dashboard
+package logger
 
 import "go.uber.org/zap"
 
-func initializeLogger() (*zap.Logger, error) {
+var L *zap.Logger
 
+func InitLogger() error {
 	config := zap.NewDevelopmentConfig()
 
 	logger, err := config.Build()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return logger, nil
+	L = logger
+
+	return nil
 }

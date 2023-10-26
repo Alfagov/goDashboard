@@ -44,10 +44,11 @@ func (t TemplRender) WriteContentType(w http.ResponseWriter) {
 type snippetRenderer struct {
 	c      interface{}
 	before []func()
+	height int
 }
 
-func NewSnippetRenderer(c interface{}, before ...func()) render.Renderer {
-	return &snippetRenderer{c: c, before: before}
+func NewSnippetRenderer(c interface{}, height int, before ...func()) render.Renderer {
+	return &snippetRenderer{c: c, before: before, height: height * 150}
 }
 
 func (r *snippetRenderer) Render(w io.Writer) error {
@@ -65,7 +66,7 @@ func (r *snippetRenderer) Render(w io.Writer) error {
 					},
 				},
 			).
-			Parse(baseTpl),
+			Parse(getSizedTemplate(r.height)),
 	)
 
 	err := tpl.ExecuteTemplate(w, tplName, r.c)
@@ -79,9 +80,6 @@ var baseTpl = `
 <div class="container">
     <div class="item" id="{{ .ChartID }}" style="width:100%;height:400px;"></div>
 </div>
-{{- range .JSAssets.Values }}
-   <script src="{{ . }}"></script>
-{{- end }}
 <script type="text/javascript">
     "use strict";
     var chart{{ .ChartID | safeJS }} = echarts.init(document.getElementById('{{ .ChartID | safeJS }}'), "{{ .Theme }}");
@@ -93,3 +91,25 @@ var baseTpl = `
 	addChart(chart{{ .ChartID | safeJS }}, {{ .ChartID }}, document.getElementById('{{ .ChartID | safeJS }}'));
 </script>
 `
+
+func getSizedTemplate(h int) string {
+	return fmt.Sprintf(`
+<div class="container">
+    <div class="item" id="{{ .ChartID }}" style="width:%s;height:%dpx;"></div>
+</div>
+<script type="text/javascript">
+    "use strict";
+    var chart{{ .ChartID | safeJS }} = echarts.init(document.getElementById('{{ .ChartID | safeJS }}'), "{{ .Theme }}");
+    var option_{{ .ChartID | safeJS }} = {{ .JSON }};
+    chart{{ .ChartID | safeJS }}.setOption(option_{{ .ChartID | safeJS }});
+    {{- range .JSFunctions.Fns }}
+    {{ . | safeJS }}
+    {{- end }}
+	addChart(chart{{ .ChartID | safeJS }}, {{ .ChartID }}, document.getElementById('{{ .ChartID | safeJS }}'));
+</script>
+`, "100%", h)
+}
+
+//{{- range .JSAssets.Values }}
+//   <script src="{{ . }}"></script>
+//{{- end }}

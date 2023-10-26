@@ -58,8 +58,8 @@ func lineGraphFromData(data *models.LineGraphData, stacked bool) *charts.Line {
 	return graph
 }
 
-func templComponentGraph(c interface{}, before ...func()) templ.ComponentFunc {
-	renderer := utils.NewSnippetRenderer(c, before...)
+func templComponentGraph(c interface{}, height int, before ...func()) templ.ComponentFunc {
+	renderer := utils.NewSnippetRenderer(c, height, before...)
 	return func(ctx context.Context, w io.Writer) error {
 		return renderer.Render(w)
 	}

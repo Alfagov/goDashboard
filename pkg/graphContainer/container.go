@@ -6,6 +6,7 @@ import (
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 )
 
 type GraphWidget interface {
@@ -13,12 +14,21 @@ type GraphWidget interface {
 	Update() map[string]interface{}
 	Encode() templ.Component
 	GetHtmx() htmx.HTMX
+	CompileRoutes(router *fiber.App)
+}
+
+func (g *graphWidgetImpl) CompileRoutes(router *fiber.App) {
+	router.Get(
+		g.htmxOpts.GetRoute(), func(c *fiber.Ctx) error {
+			return c.JSON(g.Update())
+		},
+	)
 }
 
 func (g *graphWidgetImpl) Encode() templ.Component {
 	return templates.GeneralGraph(
 		g.baseWidget.GetId(),
-		g.graph.Encode(),
+		g.graph.Encode(g.baseWidget.GetLayout().Height),
 		g.baseWidget.GetLayout(),
 		g.htmxOpts.GetHtmx(),
 	)

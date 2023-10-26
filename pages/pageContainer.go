@@ -1,35 +1,69 @@
-package pageContainer
+package pages
 
 import (
 	"github.com/Alfagov/goDashboard/models"
-	"github.com/Alfagov/goDashboard/pages"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 )
 
 type pageContainer struct {
 	Name           string
+	ImagePath      string
 	ContainerRoute string
-	Pages          map[string]pages.Page
+	Pages          map[string]Page
 	IndexPage      string
 }
 
 type PageContainer interface {
-	AddPage(page pages.Page)
-	GetPages() map[string]pages.Page
+	AddPage(page Page)
+	GetPages() map[string]Page
+	setImagePath(path string)
 	GetName() string
-	GetPage(name string) pages.Page
+	GetPage(name string) Page
 	GetIndexPage() string
 	SetIndexPage(indexPage string)
 	Encode(page string) templ.Component
 	GetRoute() string
+	CompileRoutes(router *fiber.App)
+	GetImagePath() string
+}
+
+func (p *pageContainer) CompileRoutes(router *fiber.App) {
+	router.Get(
+		p.GetRoute(), func(c *fiber.Ctx) error {
+			t := p.Encode(p.GetIndexPage())
+			c.Set("HX-Push-Url", p.GetRoute())
+			return c.Render("", templates.IndexPage(t))
+		},
+	)
+
+	for _, pg := range p.Pages {
+
+		tmpPage := pg
+		router.Get(
+			pg.GetRoute(), func(c *fiber.Ctx) error {
+				c.Set("HX-Push-Url", tmpPage.GetRoute())
+				return c.Render("", templates.IndexPage(p.Encode(tmpPage.GetName())))
+			},
+		)
+		tmpPage.CompileWidgetsRoutes(router)
+	}
+}
+
+func (p *pageContainer) setImagePath(path string) {
+	p.ImagePath = path
+}
+
+func (p *pageContainer) GetImagePath() string {
+	return p.ImagePath
 }
 
 func (p *pageContainer) SetIndexPage(indexPage string) {
 	p.IndexPage = indexPage
 }
 
-func (p *pageContainer) GetPage(name string) pages.Page {
+func (p *pageContainer) GetPage(name string) Page {
 	return p.Pages[name]
 }
 
@@ -37,7 +71,7 @@ func (p *pageContainer) GetIndexPage() string {
 	return p.IndexPage
 }
 
-func AddPage(page pages.Page) func(p PageContainer) {
+func AddPage(page Page) func(p PageContainer) {
 	return func(p PageContainer) {
 		p.AddPage(page)
 	}
@@ -49,6 +83,12 @@ func SetIndexPage(indexPage string) func(p PageContainer) {
 	}
 }
 
+func SetContainerImagePath(path string) func(p PageContainer) {
+	return func(p PageContainer) {
+		p.setImagePath(path)
+	}
+}
+
 func NewPageContainer(
 	name string, setters ...func(
 		p PageContainer,
@@ -56,7 +96,7 @@ func NewPageContainer(
 ) PageContainer {
 	var p pageContainer
 
-	p.Pages = make(map[string]pages.Page)
+	p.Pages = make(map[string]Page)
 	p.Name = name
 	p.ContainerRoute = "/" + p.Name
 
@@ -90,7 +130,7 @@ func (p *pageContainer) generatePagesDescriptor() []models.PagesDescriptor {
 	return pagesDescriptor
 }
 
-func (p *pageContainer) AddPage(page pages.Page) {
+func (p *pageContainer) AddPage(page Page) {
 	page.SetRoute(p.ContainerRoute + page.GetRoute())
 
 	widgets := page.GetWidgets()
@@ -112,7 +152,7 @@ func (p *pageContainer) AddPage(page pages.Page) {
 	p.Pages[page.GetName()] = page
 }
 
-func (p *pageContainer) GetPages() map[string]pages.Page {
+func (p *pageContainer) GetPages() map[string]Page {
 	return p.Pages
 }
 

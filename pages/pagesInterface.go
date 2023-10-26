@@ -6,11 +6,13 @@ import (
 	"github.com/Alfagov/goDashboard/pkg/numeric"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 )
 
 type page struct {
 	Name      string
 	PageRoute string
+	ImagePath string
 	Widgets   *WidgetsContainer
 }
 
@@ -25,15 +27,55 @@ type Page interface {
 	addFormWidgets(widget form.FormWidget)
 	addGraphWidget(widget graphContainer.GraphWidget)
 	setName(name string)
+	setImagePath(path string)
 	Encode() templ.Component
 	GetWidgets() *WidgetsContainer
 	GetRoute() string
 	SetRoute(route string)
 	GetName() string
+	CompileWidgetsRoutes(router *fiber.App)
+	CompilePageRoutes(router *fiber.App)
+	GetImagePath() string
 }
 
-func NewPage(setters ...func(p Page)) Page {
+func (p *page) CompileWidgetsRoutes(router *fiber.App) {
+	for _, widget := range p.Widgets.NumericWidgets {
+		widget.CompileRoutes(router)
+	}
+
+	for _, widget := range p.Widgets.FormWidgets {
+		widget.CompileRoutes(router)
+	}
+
+	for _, widget := range p.Widgets.GraphWidgets {
+		widget.CompileRoutes(router)
+	}
+}
+
+func (p *page) GetImagePath() string {
+	return p.ImagePath
+}
+
+func (p *page) CompilePageRoutes(router *fiber.App) {
+
+	router.Get(p.GetRoute(), func(c *fiber.Ctx) error {
+		c.Set("HX-Push-Url", p.GetRoute())
+		return c.Render("", templates.IndexPage(p.Encode()))
+	})
+
+	p.CompileWidgetsRoutes(router)
+
+}
+
+func NewPage(name string, setters ...func(p Page)) Page {
 	var p page
+	p.Name = name
+	p.ImagePath = "/static/img/" + name + ".png"
+	p.Widgets = &WidgetsContainer{
+		NumericWidgets: []numeric.Numeric{},
+		FormWidgets:    []form.FormWidget{},
+		GraphWidgets:   []graphContainer.GraphWidget{},
+	}
 
 	for _, setter := range setters {
 		setter(&p)
@@ -57,6 +99,10 @@ func (p *page) SetRoute(route string) {
 
 func (p *page) GetName() string {
 	return p.Name
+}
+
+func (p *page) setImagePath(path string) {
+	p.ImagePath = path
 }
 
 func (p *page) GetRoute() string {
@@ -132,5 +178,11 @@ func AddGraphWidgets(widgets ...graphContainer.GraphWidget) func(p Page) {
 func SetName(name string) func(p Page) {
 	return func(p Page) {
 		p.setName(name)
+	}
+}
+
+func SetImagePath(path string) func(p Page) {
+	return func(p Page) {
+		p.setImagePath(path)
 	}
 }

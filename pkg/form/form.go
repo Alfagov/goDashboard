@@ -5,6 +5,7 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -20,6 +21,7 @@ type FormWidget interface {
 	WithSettings(settings ...func(f FormWidget)) FormWidget
 	GetHtmx() htmx.HTMX
 	Encode() templ.Component
+	CompileRoutes(router *fiber.App)
 }
 
 type formWidget struct {
@@ -31,6 +33,16 @@ type formWidget struct {
 	initialValue  models.UpdateResponse
 	popUpResponse bool
 	htmxOpts      htmx.HTMX
+}
+
+func (fw *formWidget) CompileRoutes(router *fiber.App) {
+	router.Post(
+		fw.htmxOpts.GetRoute(), func(c *fiber.Ctx) error {
+			update := fw.HandlePost(NewFormRequest(c))
+
+			return c.Render("", fw.UpdateAction(update))
+		},
+	)
 }
 
 func newForm() *formWidget {

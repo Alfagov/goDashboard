@@ -4,6 +4,7 @@ import (
 	"github.com/Alfagov/goDashboard/htmx"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 	"github.com/oklog/ulid/v2"
 	"time"
 )
@@ -30,6 +31,20 @@ type Numeric interface {
 	Encode() templ.Component
 
 	GetHtmx() htmx.HTMX
+	CompileRoutes(router *fiber.App)
+}
+
+func (n *numeric) CompileRoutes(router *fiber.App) {
+	router.Get(
+		n.htmxOpts.GetRoute(), func(c *fiber.Ctx) error {
+			update, err := n.HandleUpdate()
+			if err != nil {
+				return err
+			}
+
+			return c.Render("", n.UpdateAction(update))
+		},
+	)
 }
 
 func newNumeric() *numeric {

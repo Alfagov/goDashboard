@@ -1,0 +1,25 @@
+package templates
+
+import "github.com/Alfagov/goDashboard/models"
+
+templ SimpleGridPage(pages []models.PageSpec) {
+	<main class="grid h-full grid-cols-3 gap-6">
+		<section class="col-span-3 rounded p-4">
+			<div class="grid grid-cols-3 gap-6">
+                for _, item := range pages {
+                    @PageGridComponent(item)
+                }
+            </div>
+		</section>
+	</main>
+}
+
+templ PageGridComponent(page models.PageSpec) {
+    <a href={ templ.URL(page.Route) } class="block focus:outline-none">
+        <div class="bg-white p-4 rounded shadow transform transition-all duration-300 hover:scale-105 hover:bg-gray-200 hover:shadow-lg active:scale-95">
+            <div class="text-xl mb-2">{page.Name}</div>
+            <img src={ page.ImageRoute } alt="Placeholder image" class="mb-4 rounded" />
+            <p>{page.Description}</p>
+        </div>
+    </a>
+}
