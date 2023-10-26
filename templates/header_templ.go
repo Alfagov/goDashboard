@@ -31,7 +31,7 @@ func header() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</title><link href=\"/internal_static/css/compiled.css\" rel=\"stylesheet\"><script src=\"/internal_static/js/htmx.js\" integrity=\"sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni\" crossorigin=\"anonymous\">")
+		_, err = templBuffer.WriteString("</title><link href=\"/internal_static/css/compiled.css\" rel=\"stylesheet\"><script src=\"internal_static/js/htmx.js\" integrity=\"sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni\" crossorigin=\"anonymous\">")
 		if err != nil {
 			return err
 		}

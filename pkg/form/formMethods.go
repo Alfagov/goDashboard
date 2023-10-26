@@ -5,40 +5,41 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
+	"github.com/gofiber/fiber/v2"
 )
 
-func (fw *formWidget) HandlePost(c FormRequest) *models.UpdateResponse {
+func (fw *formImpl) handlePost(c FormRequest) *models.UpdateResponse {
 	return fw.updateHandler(c)
 }
 
-func (fw *formWidget) addFormFields(field ...*models.FormField) {
+func (fw *formImpl) addFormFields(field ...*models.FormField) {
 	fw.fields = append(fw.fields, field...)
 }
 
-func (fw *formWidget) addFormButtons(button ...*models.FormButton) {
+func (fw *formImpl) addFormButtons(button ...*models.FormButton) {
 	fw.buttons = append(fw.buttons, button...)
 }
 
-func (fw *formWidget) addFormCheckboxes(checkbox ...*models.FormCheckbox) {
+func (fw *formImpl) addFormCheckboxes(checkbox ...*models.FormCheckbox) {
 	fw.checkboxes = append(fw.checkboxes, checkbox...)
 }
 
-func (fw *formWidget) setUpdateHandler(
+func (fw *formImpl) setUpdateHandler(
 	handler func(c FormRequest) *models.UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
 }
 
-func (fw *formWidget) setInitialValue(value models.UpdateResponse) {
+func (fw *formImpl) setInitialValue(value models.UpdateResponse) {
 	fw.initialValue = value
 }
 
-func (fw *formWidget) GetHtmx() htmx.HTMX {
+func (fw *formImpl) getHtmx() htmx.HTMX {
 	return fw.htmxOpts
 }
 
-func (fw *formWidget) UpdateAction(data *models.UpdateResponse) templ.Component {
+func (fw *formImpl) updateAction(data *models.UpdateResponse) templ.Component {
 
 	if !data.Success {
 		element := templates.ErrorAlert(data.Title, data.Message)
@@ -49,11 +50,11 @@ func (fw *formWidget) UpdateAction(data *models.UpdateResponse) templ.Component 
 	return element
 }
 
-func (fw *formWidget) WithSettings(
+func (fw *formImpl) WithSettings(
 	settings ...func(
-		f FormWidget,
+		f Form,
 	),
-) FormWidget {
+) Form {
 	for _, setter := range settings {
 		setter(fw)
 	}
@@ -61,7 +62,7 @@ func (fw *formWidget) WithSettings(
 	return fw
 }
 
-func (fw *formWidget) Encode() templ.Component {
+func (fw *formImpl) Encode() templ.Component {
 	fields := fw.fields
 	buttons := fw.buttons
 	checkboxes := fw.checkboxes
@@ -81,4 +82,18 @@ func (fw *formWidget) Encode() templ.Component {
 	)
 
 	return element
+}
+
+func (fw *formImpl) CompileRoutes(router *fiber.App) {
+	router.Post(
+		fw.htmxOpts.GetUrl(), func(c *fiber.Ctx) error {
+			update := fw.handlePost(NewFormRequest(c))
+
+			return c.Render("", fw.updateAction(update))
+		},
+	)
+}
+
+func (fw *formImpl) AddParentPath(path string) error {
+	return fw.htmxOpts.GetHtmx().AddBeforePath(path)
 }

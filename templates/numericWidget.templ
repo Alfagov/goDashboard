@@ -7,7 +7,7 @@ import "github.com/Alfagov/goDashboard/layout"
 templ NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *models.WidgetLayout) {
 	<div
  		class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }
- 		hx-get={ htmx.Route }
+ 		hx-get={ htmx.Route.String() }
  		hx-trigger={ "every " + htmx.Interval }
  		hx-target={ htmx.Target }
  		hx-swap={ htmx.Swap }
@@ -26,7 +26,7 @@ templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models
 	<div class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }>
 		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
 		<div id="form-error"></div>
-		<form hx-post={ htmx.Route } hx-swap="afterbegin" hx-target="#test-id">
+		<form hx-post={ htmx.Route.String() } hx-swap="afterbegin" hx-target="#test-id">
 			for _, field := range fields {
 				{! field }
 			}
