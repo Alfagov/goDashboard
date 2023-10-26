@@ -1,12 +1,14 @@
 package pages
 
 import (
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/pkg/form"
 	"github.com/Alfagov/goDashboard/pkg/graphContainer"
 	"github.com/Alfagov/goDashboard/pkg/numeric"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
 type page struct {
@@ -118,15 +120,20 @@ func (p *page) setName(name string) {
 }
 
 func (p *page) addNumericWidgets(widget numeric.Numeric) {
-	htm := widget.GetHtmx()
-	htm.SetRoute(p.Name + htm.GetRoute())
+
+	err := widget.AddParentPath(p.Name)
+	if err != nil {
+		logger.L.Error("Error adding parent path", zap.Error(err))
+	}
 
 	p.Widgets.NumericWidgets = append(p.Widgets.NumericWidgets, widget)
 }
 
 func (p *page) addFormWidgets(widget form.FormWidget) {
-	htm := widget.GetHtmx()
-	htm.SetRoute(p.Name + htm.GetRoute())
+	err := widget.AddParentPath(p.Name)
+	if err != nil {
+		logger.L.Error("Error adding parent path", zap.Error(err))
+	}
 
 	p.Widgets.FormWidgets = append(p.Widgets.FormWidgets, widget)
 }

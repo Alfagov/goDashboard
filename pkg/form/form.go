@@ -22,6 +22,7 @@ type FormWidget interface {
 	GetHtmx() htmx.HTMX
 	Encode() templ.Component
 	CompileRoutes(router *fiber.App)
+	AddParentPath(path string) error
 }
 
 type formWidget struct {
@@ -43,6 +44,10 @@ func (fw *formWidget) CompileRoutes(router *fiber.App) {
 			return c.Render("", fw.UpdateAction(update))
 		},
 	)
+}
+
+func (fw *formWidget) AddParentPath(path string) error {
+	return fw.htmxOpts.GetHtmx().AddBeforePath(path)
 }
 
 func newForm() *formWidget {

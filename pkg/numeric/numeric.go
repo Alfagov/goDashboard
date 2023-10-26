@@ -32,6 +32,11 @@ type Numeric interface {
 
 	GetHtmx() htmx.HTMX
 	CompileRoutes(router *fiber.App)
+	AddParentPath(path string) error
+}
+
+func (n *numeric) AddParentPath(path string) error {
+	return n.htmxOpts.GetHtmx().AddBeforePath(path)
 }
 
 func (n *numeric) CompileRoutes(router *fiber.App) {

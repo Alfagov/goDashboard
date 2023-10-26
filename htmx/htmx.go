@@ -1,7 +1,9 @@
 package htmx
 
+import "net/url"
+
 type Htmx struct {
-	Route    string
+	Route    url.URL
 	Method   string
 	Target   string
 	Interval string
@@ -9,8 +11,8 @@ type Htmx struct {
 }
 
 type HTMX interface {
-	SetRoute(route string)
-	GetRoute() string
+	AddBeforePath(path string) error
+	AppendToPath(path string)
 
 	SetMethod(method string)
 	GetMethod() string
@@ -36,12 +38,23 @@ func (h *Htmx) GetHtmx() *Htmx {
 	return h
 }
 
-func (h *Htmx) SetRoute(route string) {
-	h.Route = route
+func (h *Htmx) AddBeforePath(path string) error {
+	path, err := url.JoinPath(path, h.Route.Path)
+	if err != nil {
+		return err
+	}
+
+	h.Route.Path = path
+
+	return nil
 }
 
-func (h *Htmx) GetRoute() string {
-	return h.Route
+func (h *Htmx) AppendToPath(path string) {
+	h.Route = *h.Route.JoinPath(path)
+}
+
+func (h *Htmx) GetUrl() string {
+	return h.Route.String()
 }
 
 func (h *Htmx) SetMethod(method string) {
