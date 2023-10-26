@@ -18,20 +18,44 @@ type numeric struct {
 	htmxOpts      htmx.HTMX
 }
 
+// Numeric is an interface that defines methods for numeric-based components.
+// The type implementing this interface can set and update values, handle unit formatting,
+// and additionally has methods to interface with templates, routes, and HTMX.
 type Numeric interface {
+
+	// setUpdateHandler sets a handler function that returns an integer and an error.
+	// This handler function runs when an update operation is called for the implementing type.
 	setUpdateHandler(handler func() (int, error))
+
+	// setInitialValue sets initial integer value for the implementing type.
 	setInitialValue(value int)
+
+	// setUnit sets a string representing the unit of value for the implementing type.
 	setUnit(unit string)
+
+	// withUnitAfter toggles unit positioning to place after the value in the implementing type.
 	withUnitAfter()
 
-	UpdateAction(value int) templ.Component
-	HandleUpdate() (int, error)
+	// updateAction performs an update operation with an integer value and returns a templ.Component.
+	updateAction(value int) templ.Component
 
+	// handleUpdate handles an update operation and returns an updated integer and an error if it occurs.
+	handleUpdate() (int, error)
+
+	// WithSettings accepts a series of settings functions and applies them to the implementing type,
+	// returning the modified implementing type.
 	WithSettings(settings ...func(f Numeric)) Numeric
+
+	// Encode translates the implementing type into a templ.Component for usage in templates.
 	Encode() templ.Component
 
-	GetHtmx() htmx.HTMX
+	// getHtmx returns an htmx.HTMX related to the implementing type.
+	getHtmx() htmx.HTMX
+
+	// CompileRoutes adds routes to the router for the implementing type.
 	CompileRoutes(router *fiber.App)
+
+	// AddParentPath adds a parent path string to the implementing type and returns an error if this operation fails.
 	AddParentPath(path string) error
 }
 
@@ -41,13 +65,13 @@ func (n *numeric) AddParentPath(path string) error {
 
 func (n *numeric) CompileRoutes(router *fiber.App) {
 	router.Get(
-		n.htmxOpts.GetRoute(), func(c *fiber.Ctx) error {
-			update, err := n.HandleUpdate()
+		n.htmxOpts.GetUrl(), func(c *fiber.Ctx) error {
+			update, err := n.handleUpdate()
 			if err != nil {
 				return err
 			}
 
-			return c.Render("", n.UpdateAction(update))
+			return c.Render("", n.updateAction(update))
 		},
 	)
 }
@@ -74,7 +98,7 @@ func NewNumeric(
 	id := "numericWidget_" + ulid.Make().String()
 	widget.baseWidget.SetId(id)
 
-	widget.htmxOpts.SetRoute("/update/" + id)
+	widget.htmxOpts.AppendToPath("update", id)
 	widget.htmxOpts.SetInterval(updateInterval.String())
 	widget.htmxOpts.SetTarget("this")
 	widget.htmxOpts.SetSwap("outerHTML")

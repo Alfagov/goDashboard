@@ -12,7 +12,9 @@ type Htmx struct {
 
 type HTMX interface {
 	AddBeforePath(path string) error
-	AppendToPath(path string)
+	AppendToPath(path ...string)
+
+	GetUrl() string
 
 	SetMethod(method string)
 	GetMethod() string
@@ -31,6 +33,7 @@ type HTMX interface {
 
 func NewEmpty() HTMX {
 	var h Htmx
+	h.Route = url.URL{}
 	return &h
 }
 
@@ -49,8 +52,8 @@ func (h *Htmx) AddBeforePath(path string) error {
 	return nil
 }
 
-func (h *Htmx) AppendToPath(path string) {
-	h.Route = *h.Route.JoinPath(path)
+func (h *Htmx) AppendToPath(path ...string) {
+	h.Route = *h.Route.JoinPath(path...)
 }
 
 func (h *Htmx) GetUrl() string {

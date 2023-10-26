@@ -4,49 +4,33 @@ import (
 	"github.com/Alfagov/goDashboard/htmx"
 	"github.com/Alfagov/goDashboard/pkg/graph"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
-	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 )
 
+// GraphWidget represents an interface for a widget in the graph UI.
 type GraphWidget interface {
+
+	// update method returns a map representing the state of the GraphWidget.
+	update() map[string]interface{}
+
+	// getHtmx method returns an HTMX object associated with the GraphWidget.
+	getHtmx() htmx.HTMX
+
+	// WithSettings method is used to update the GraphWidget's settings.
+	// It accepts a variable number of functions that mutate the GraphWidget.
 	WithSettings(settings ...func(gw GraphWidget)) GraphWidget
-	Update() map[string]interface{}
-	Encode() templ.Component
-	GetHtmx() htmx.HTMX
+
+	// CompileRoutes method registers the necessary routes with the provided *fiber.App.
 	CompileRoutes(router *fiber.App)
-}
 
-func (g *graphWidgetImpl) CompileRoutes(router *fiber.App) {
-	router.Get(
-		g.htmxOpts.GetRoute(), func(c *fiber.Ctx) error {
-			return c.JSON(g.Update())
-		},
-	)
-}
+	// AddParentPath method appends a new path to the GraphWidget's parent
+	// paths list.
+	//It returns an error in case of failure.
+	AddParentPath(path string) error
 
-func (g *graphWidgetImpl) Encode() templ.Component {
-	return templates.GeneralGraph(
-		g.baseWidget.GetId(),
-		g.graph.Encode(g.baseWidget.GetLayout().Height),
-		g.baseWidget.GetLayout(),
-		g.htmxOpts.GetHtmx(),
-	)
-}
-
-func (g *graphWidgetImpl) Update() map[string]interface{} {
-	return g.graph.HandleUpdate()
-}
-
-func (g *graphWidgetImpl) GetHtmx() htmx.HTMX {
-	return g.htmxOpts
-}
-
-func (g *graphWidgetImpl) WithSettings(settings ...func(gw GraphWidget)) GraphWidget {
-	for _, setter := range settings {
-		setter(g)
-	}
-	return g
+	// Encode method returns a templ.Component which represents the GraphWidget's HTML component.
+	Encode() templ.Component
 }
 
 type graphWidgetImpl struct {
@@ -81,7 +65,7 @@ func NewGraphWidget(
 
 	w.baseWidget.SetId(id)
 	w.baseWidget.SetName(name)
-	w.htmxOpts.SetRoute("/graph/" + id)
+	w.htmxOpts.AppendToPath("graph", id)
 
 	return w
 }

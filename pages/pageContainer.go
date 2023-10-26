@@ -133,23 +133,7 @@ func (p *pageContainer) generatePagesDescriptor() []models.PagesDescriptor {
 }
 
 func (p *pageContainer) AddPage(page Page) {
-	page.SetRoute(p.ContainerRoute + page.GetRoute())
-
-	widgets := page.GetWidgets()
-	for _, widget := range widgets.NumericWidgets {
-		htm := widget.GetHtmx()
-		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
-	}
-
-	for _, widget := range widgets.FormWidgets {
-		htm := widget.GetHtmx()
-		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
-	}
-
-	for _, widget := range widgets.GraphWidgets {
-		htm := widget.GetHtmx()
-		htm.SetRoute(p.ContainerRoute + htm.GetRoute())
-	}
+	page.AddParentPath(p.ContainerRoute)
 
 	p.Pages[page.GetName()] = page
 }

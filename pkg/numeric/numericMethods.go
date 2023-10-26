@@ -7,11 +7,11 @@ import (
 	"strconv"
 )
 
-func (n *numeric) GetHtmx() htmx.HTMX {
+func (n *numeric) getHtmx() htmx.HTMX {
 	return n.htmxOpts
 }
 
-func (n *numeric) HandleUpdate() (int, error) {
+func (n *numeric) handleUpdate() (int, error) {
 	return n.updateHandler()
 }
 
@@ -39,7 +39,7 @@ func (n *numeric) setUpdateHandler(handler func() (int, error)) {
 	n.updateHandler = handler
 }
 
-func (n *numeric) UpdateAction(value int) templ.Component {
+func (n *numeric) updateAction(value int) templ.Component {
 	element := templates.NumericWidget(
 		n.baseWidget.GetName(), strconv.Itoa(value), n.unit, n.unitAfter,
 		n.htmxOpts.GetHtmx(),

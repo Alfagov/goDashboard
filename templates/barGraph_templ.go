@@ -96,7 +96,7 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *models.WidgetL
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Route))
+		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Route.String()))
 		if err != nil {
 			return err
 		}
