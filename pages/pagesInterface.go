@@ -80,11 +80,11 @@ func NewPage(name string, setters ...func(p Page)) Page {
 		GraphWidgets:   []graphContainer.GraphWidget{},
 	}
 
+	p.PageRoute = url.URL{Path: p.Name}
+
 	for _, setter := range setters {
 		setter(&p)
 	}
-
-	p.PageRoute = url.URL{Path: p.Name}
 
 	return &p
 }
