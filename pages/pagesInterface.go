@@ -34,7 +34,7 @@ type Page interface {
 	SetRoute(route string)
 	GetName() string
 	CompileWidgetsRoutes(router *fiber.App)
-	CompilePageRoutes(router *fiber.App)
+	CompilePageRoutes(router *fiber.App, indexRenderer func(component templ.Component) templ.Component)
 	GetImagePath() string
 }
 
@@ -56,11 +56,11 @@ func (p *page) GetImagePath() string {
 	return p.ImagePath
 }
 
-func (p *page) CompilePageRoutes(router *fiber.App) {
+func (p *page) CompilePageRoutes(router *fiber.App, indexRenderer func(component templ.Component) templ.Component) {
 
 	router.Get(p.GetRoute(), func(c *fiber.Ctx) error {
 		c.Set("HX-Push-Url", p.GetRoute())
-		return c.Render("", templates.IndexPage(p.Encode()))
+		return c.Render("", indexRenderer(p.Encode()))
 	})
 
 	p.CompileWidgetsRoutes(router)

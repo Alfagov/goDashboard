@@ -7,6 +7,7 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pages"
 	"github.com/Alfagov/goDashboard/utils"
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	fLogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"go.uber.org/zap"
@@ -16,10 +17,13 @@ import (
 var staticFiles embed.FS
 
 type dashboard struct {
+	Name           string
+	Image          string
 	Router         *fiber.App
 	Pages          map[string]pages.Page
 	PageContainers map[string]pages.PageContainer
 	PagesSpec      []models.PageSpec
+	IndexPage      func(body templ.Component) templ.Component
 }
 
 type Dashboard interface {
@@ -29,7 +33,7 @@ type Dashboard interface {
 	Run() error
 }
 
-func NewDashboard() Dashboard {
+func NewDashboard(name string, img string) Dashboard {
 
 	app := fiber.New(fiber.Config{Views: &utils.TemplRender{}})
 
@@ -49,6 +53,8 @@ func NewDashboard() Dashboard {
 	)
 
 	return &dashboard{
+		Name:           name,
+		Image:          img,
 		Router:         app,
 		Pages:          make(map[string]pages.Page),
 		PageContainers: make(map[string]pages.PageContainer),

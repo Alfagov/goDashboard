@@ -25,16 +25,18 @@ type PageContainer interface {
 	SetIndexPage(indexPage string)
 	Encode(page string) templ.Component
 	GetRoute() string
-	CompileRoutes(router *fiber.App)
+	CompileRoutes(router *fiber.App, indexRenderer func(component templ.Component) templ.Component)
 	GetImagePath() string
 }
 
-func (p *pageContainer) CompileRoutes(router *fiber.App) {
+func (p *pageContainer) CompileRoutes(
+	router *fiber.App, indexRenderer func(component templ.Component) templ.Component,
+) {
 	router.Get(
 		p.GetRoute(), func(c *fiber.Ctx) error {
 			t := p.Encode(p.GetIndexPage())
 			c.Set("HX-Push-Url", p.GetRoute())
-			return c.Render("", templates.IndexPage(t))
+			return c.Render("", indexRenderer(t))
 		},
 	)
 
@@ -44,7 +46,7 @@ func (p *pageContainer) CompileRoutes(router *fiber.App) {
 		router.Get(
 			pg.GetRoute(), func(c *fiber.Ctx) error {
 				c.Set("HX-Push-Url", tmpPage.GetRoute())
-				return c.Render("", templates.IndexPage(p.Encode(tmpPage.GetName())))
+				return c.Render("", indexRenderer(p.Encode(tmpPage.GetName())))
 			},
 		)
 		tmpPage.CompileWidgetsRoutes(router)

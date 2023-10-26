@@ -7,6 +7,7 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pages"
 	"github.com/Alfagov/goDashboard/templates"
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"os"
@@ -26,9 +27,18 @@ func (d *dashboard) AddPage(page pages.Page) {
 func (d *dashboard) Compile() {
 	logger.L.Debug("Compiling dashboard", zap.String("Name", ""))
 	d.generateDashboardPagesSpec()
+	d.generateIndexPageTemplate()
 	d.createContainerPagesRoutes()
 	d.createPagesRoutes()
 	d.createIndexPage()
+}
+
+func (d *dashboard) generateIndexPageTemplate() {
+	d.IndexPage = func(body templ.Component) templ.Component {
+		name := d.Name
+		img := d.Image
+		return templates.IndexPage(name, img, pagesSpecToElement(d.PagesSpec), body)
+	}
 }
 
 func (d *dashboard) Run() error {
@@ -69,13 +79,13 @@ func (d *dashboard) Run() error {
 
 func (d *dashboard) createPagesRoutes() {
 	for _, page := range d.Pages {
-		page.CompilePageRoutes(d.Router)
+		page.CompilePageRoutes(d.Router, d.IndexPage)
 	}
 }
 
 func (d *dashboard) createContainerPagesRoutes() {
 	for _, container := range d.PageContainers {
-		container.CompileRoutes(d.Router)
+		container.CompileRoutes(d.Router, d.IndexPage)
 	}
 }
 
@@ -100,7 +110,7 @@ func (d *dashboard) createIndexPage() {
 
 	d.Router.Get("/", func(c *fiber.Ctx) error {
 		c.Set("HX-Push-Url", "/")
-		return c.Render("", templates.IndexPage(page))
+		return c.Render("", d.IndexPage(page))
 	})
 }
 
