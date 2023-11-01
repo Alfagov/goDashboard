@@ -1,9 +1,11 @@
 package pages
 
 import (
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
+	"go.uber.org/zap"
 )
 
 // PageContainer is a container for pages
@@ -101,12 +103,12 @@ func (pc *pageContainer) FindChild(name string) (components.UIComponent, bool) {
 	return child, ok
 }
 
-func (p *pageContainer) Id() string {
-	return p.id
+func (pc *pageContainer) Id() string {
+	return pc.id
 }
 
-func (p *pageContainer) FindChildById(id string) (components.UIComponent, bool) {
-	for _, child := range p.children {
+func (pc *pageContainer) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range pc.children {
 		if child.Id() == id {
 			return child, true
 		}
@@ -137,6 +139,13 @@ func (pc *pageContainer) GetParent() components.UIComponent {
 }
 
 func (pc *pageContainer) AddChild(child components.UIComponent) error {
+	if !child.Type().Is(components.PageType) {
+		logger.L.Error("PageContainer.WithPages: wrong type of page", zap.String("page", child.Name()),
+			zap.String("type", child.Type().TypeName()))
+
+		return components.ErrWrongChildType(child.Name(), components.PageType.TypeName(), child.Type().TypeName())
+	}
+
 	_, exists := pc.children[child.Name()]
 	if exists {
 		return components.ErrChildExists(child.Name())

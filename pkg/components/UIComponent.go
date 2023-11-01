@@ -18,6 +18,10 @@ var (
 	ErrChildNotFound = func(name string) error {
 		return errors.New("child with name " + name + " not found")
 	}
+
+	ErrWrongChildType = func(name string, expectedType, componentType string) error {
+		return errors.New("child with name " + name + " is not of type " + expectedType + " but of type " + componentType)
+	}
 )
 
 type UIComponent interface {

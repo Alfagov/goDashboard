@@ -1,13 +1,11 @@
 package graphContainer
 
 import (
-	"errors"
 	"github.com/Alfagov/goDashboard/htmx"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/graph"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
-	"github.com/Alfagov/goDashboard/templates"
 )
 
 // GraphWidget represents an interface for a widget in the graph UI.
@@ -29,84 +27,6 @@ type graphWidgetImpl struct {
 	specs       *models.TreeSpec
 	htmxOpts    htmx.HTMX
 	graph       graph.Graph
-}
-
-func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.RenderResponse {
-	if req != nil {
-		return &components.RenderResponse{
-			Json: g.update(),
-		}
-	}
-
-	return &components.RenderResponse{
-		Component: templates.GeneralGraph(
-			g.baseWidget.GetId(),
-			g.graph.Encode(g.baseWidget.GetLayout().Height),
-			g.baseWidget.GetLayout(),
-			g.htmxOpts.GetHtmx(),
-		),
-	}
-}
-
-func (g *graphWidgetImpl) Type() components.NodeType {
-	return components.GraphWidgetType
-}
-
-func (g *graphWidgetImpl) Name() string {
-	return g.baseWidget.GetName()
-}
-
-func (g *graphWidgetImpl) UpdateSpec() *models.TreeSpec {
-	route := components.GetRouteFromParents(g)
-
-	g.htmxOpts.AddBeforePath(route)
-	return &models.TreeSpec{
-		Name:        g.Name(),
-		ImageRoute:  "",
-		Description: g.description,
-		Route:       g.htmxOpts.GetUrl(),
-		Children:    nil,
-	}
-}
-
-func (g *graphWidgetImpl) GetSpec() *models.TreeSpec {
-	return g.specs
-}
-
-func (g *graphWidgetImpl) GetChildren() []components.UIComponent {
-	return nil
-}
-
-func (g *graphWidgetImpl) FindChild(string) (components.UIComponent, bool) {
-	return nil, false
-}
-
-func (g *graphWidgetImpl) FindChildByType(string, string) (components.UIComponent, bool) {
-	return nil, false
-}
-
-func (g *graphWidgetImpl) Id() string {
-	return g.baseWidget.GetId()
-}
-
-func (g *graphWidgetImpl) FindChildById(string) (components.UIComponent, bool) {
-	return nil, false
-}
-
-func (g *graphWidgetImpl) SetParent(parent components.UIComponent) {
-	g.parent = parent
-}
-
-func (g *graphWidgetImpl) GetParent() components.UIComponent {
-	return g.parent
-}
-
-func (g *graphWidgetImpl) AddChild(components.UIComponent) error {
-	return errors.New("not applicable")
-}
-
-func (g *graphWidgetImpl) KillChild(components.UIComponent) error {
-	return errors.New("not applicable")
 }
 
 func newGraphWidget() *graphWidgetImpl {

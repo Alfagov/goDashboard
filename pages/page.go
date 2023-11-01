@@ -1,10 +1,12 @@
 package pages
 
 import (
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
+	"go.uber.org/zap"
 )
 
 // page is a container of widgets
@@ -139,6 +141,14 @@ func (p *page) GetParent() components.UIComponent {
 }
 
 func (p *page) AddChild(child components.UIComponent) error {
+
+	if !(child.Type().SuperType() == "widgets") {
+		logger.L.Error("Page: wrong type of child", zap.String("name", child.Name()),
+			zap.String("type", child.Type().TypeName()))
+
+		return components.ErrWrongChildType(child.Name(), components.PageType.TypeName(), child.Type().TypeName())
+	}
+
 	_, exists := p.FindChild(child.Name())
 	if exists {
 		return components.ErrChildExists(child.Name())

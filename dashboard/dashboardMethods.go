@@ -3,9 +3,11 @@ package dashboard
 import (
 	_ "embed"
 	"github.com/Alfagov/goDashboard/config"
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
+	"go.uber.org/zap"
 )
 
 // Dashboard interface implementation
@@ -79,12 +81,12 @@ func (d *dashboard) FindChildByType(name string, componentType string) (componen
 	return child, true
 }
 
-func (p *dashboard) Id() string {
-	return p.id
+func (d *dashboard) Id() string {
+	return d.id
 }
 
-func (p *dashboard) FindChildById(id string) (components.UIComponent, bool) {
-	for _, child := range p.Children {
+func (d *dashboard) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range d.Children {
 		if child.Id() == id {
 			return child, true
 		}
@@ -100,6 +102,14 @@ func (d *dashboard) GetParent() components.UIComponent {
 }
 
 func (d *dashboard) AddChild(child components.UIComponent) error {
+
+	if !(child.Type().SuperType() == "pages") {
+		logger.L.Error("Dashboard: wrong type of child", zap.String("name", child.Name()),
+			zap.String("type", child.Type().TypeName()))
+
+		return components.ErrWrongChildType(child.Name(), components.PageType.TypeName(), child.Type().TypeName())
+	}
+
 	_, exists := d.Children[child.Name()]
 	if exists {
 		return components.ErrChildExists(child.Name())
