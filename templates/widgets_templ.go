@@ -11,7 +11,7 @@ import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
 
-func GridListElement(element models.ListElement) templ.Component {
+func GridListElement(element *models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -70,7 +70,7 @@ func GridListElement(element models.ListElement) templ.Component {
 	})
 }
 
-func ListGridPage(elements []models.ListElement) templ.Component {
+func ListGridPage(elements []*models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {

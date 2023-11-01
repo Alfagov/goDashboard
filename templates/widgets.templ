@@ -2,7 +2,7 @@ package templates
 
 import "github.com/Alfagov/goDashboard/models"
 
-templ GridListElement(element models.ListElement) {
+templ GridListElement(element *models.TreeSpec) {
     <a href={ templ.URL(element.Route) } class="block focus:outline-none">
         <div class="bg-white p-4 rounded shadow transform transition-all duration-300 hover:scale-105 hover:bg-gray-200 hover:shadow-lg active:scale-95">
             <div class="text-xl mb-2">{element.Name}</div>
@@ -12,7 +12,7 @@ templ GridListElement(element models.ListElement) {
     </a>
 }
 
-templ ListGridPage(elements []models.ListElement) {
+templ ListGridPage(elements []*models.TreeSpec) {
 
 	<main class="grid h-full grid-cols-3 gap-6">
 		<section class="col-span-3 rounded p-4">

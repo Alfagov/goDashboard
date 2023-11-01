@@ -43,7 +43,7 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Route.String()))
+		_, err = templBuffer.WriteString(templ.EscapeString("/" + htmx.Route.String()))
 		if err != nil {
 			return err
 		}
@@ -173,7 +173,7 @@ func GenericForm(formTitle string, fields []templ.Component, checkbox []*models.
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(htmx.Route.String()))
+		_, err = templBuffer.WriteString(templ.EscapeString("/" + htmx.Route.String()))
 		if err != nil {
 			return err
 		}

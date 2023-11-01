@@ -2,13 +2,13 @@ package templates
 
 import "github.com/Alfagov/goDashboard/models"
 
-templ Aside(descriptor []models.PagesDescriptor) {
+templ Aside(descriptor []*models.TreeSpec) {
 	<aside class="col-span-1 row-start-1 row-end-6 rounded bg-white p-4 shadow-lg">
 		<h2 class="mb-4 text-lg font-semibold">Menu</h2>
 		<ul>
 			for _, page := range descriptor {
 				<li class="mb-2">
-					<a onclick="disposeAllCharts()" hx-target="#page-content" hx-get={ page.Route } hx-swap="outerHTML" hx-select="#page-content" class="text-gray-700">{ page.Name }</a>
+					<a onclick="disposeAllCharts()" hx-target="#page-content" hx-get={ "/" + page.Route } hx-swap="outerHTML" hx-select="#page-content" class="text-gray-700">{ page.Name }</a>
 				</li>
 			}
 		</ul>

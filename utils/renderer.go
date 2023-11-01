@@ -16,8 +16,8 @@ type TemplRender struct {
 }
 
 func (t TemplRender) Render(
-	w io.Writer, n string, data interface{},
-	l ...string,
+	w io.Writer, _ string, data interface{},
+	_ ...string,
 ) error {
 
 	d, ok := data.(templ.Component)

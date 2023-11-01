@@ -1,83 +1,200 @@
 package pages
 
 import (
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
-	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
+// PageContainer is a container for pages
 type pageContainer struct {
-	Name           string
-	ImagePath      string
-	ContainerRoute string
-	Pages          map[string]Page
-	IndexPage      string
+	id          string
+	name        string
+	imagePath   string
+	description string
+	indexPage   string
+
+	spec     *models.TreeSpec
+	parent   components.UIComponent
+	children map[string]components.UIComponent
 }
 
 type PageContainer interface {
-	AddPage(page Page)
-	GetPages() map[string]Page
+	components.UIComponent
 	setImagePath(path string)
-	GetName() string
-	GetPage(name string) Page
 	GetIndexPage() string
 	SetIndexPage(indexPage string)
-	Encode(page string) templ.Component
-	GetRoute() string
-	CompileRoutes(router *fiber.App, indexRenderer func(component templ.Component) templ.Component)
 	GetImagePath() string
+	WithPages(pages ...components.UIComponent) PageContainer
 }
 
-func (p *pageContainer) CompileRoutes(
-	router *fiber.App, indexRenderer func(component templ.Component) templ.Component,
-) {
-	router.Get(
-		p.GetRoute(), func(c *fiber.Ctx) error {
-			t := p.Encode(p.GetIndexPage())
-			c.Set("HX-Push-Url", p.GetRoute())
-			return c.Render("", indexRenderer(t))
-		},
-	)
+func NewPageContainer(
+	name string, setters ...func(
+		pc PageContainer,
+	),
+) PageContainer {
+	var pc pageContainer
+	pc.name = name
+	pc.imagePath = "/static/img/" + name + ".png"
+	pc.children = make(map[string]components.UIComponent)
 
-	for _, pg := range p.Pages {
+	for _, setter := range setters {
+		setter(&pc)
+	}
 
-		tmpPage := pg
-		router.Get(
-			pg.GetRoute(), func(c *fiber.Ctx) error {
-				c.Set("HX-Push-Url", tmpPage.GetRoute())
-				return c.Render("", indexRenderer(p.Encode(tmpPage.GetName())))
-			},
-		)
-		tmpPage.CompileWidgetsRoutes(router)
+	return &pc
+}
+
+// UIComponent interface implementation
+
+func (pc *pageContainer) UpdateSpec() *models.TreeSpec {
+
+	route := pc.parent.Name() + "/" + pc.name
+
+	var childrenSpec []*models.TreeSpec
+	for _, child := range pc.children {
+		childrenSpec = append(childrenSpec, child.UpdateSpec())
+	}
+
+	spec := &models.TreeSpec{
+		Name:        pc.name,
+		ImageRoute:  pc.imagePath,
+		Description: pc.description,
+		Route:       route,
+		Children:    childrenSpec,
+	}
+
+	pc.spec = spec
+
+	return spec
+}
+
+func (pc *pageContainer) GetSpec() *models.TreeSpec {
+	return pc.spec
+}
+
+func (pc *pageContainer) Render(components.RequestWrapper) *components.RenderResponse {
+	return &components.RenderResponse{
+		Component: templates.PageContainer(pc.children[pc.indexPage].Render(nil).Component, pc.spec.Children),
 	}
 }
 
-func (p *pageContainer) setImagePath(path string) {
-	p.ImagePath = path
+func (pc *pageContainer) Type() components.NodeType {
+	return components.PageContainerType
 }
 
-func (p *pageContainer) GetImagePath() string {
-	return p.ImagePath
+func (pc *pageContainer) Name() string {
+	return pc.name
 }
 
-func (p *pageContainer) SetIndexPage(indexPage string) {
-	p.IndexPage = indexPage
-}
-
-func (p *pageContainer) GetPage(name string) Page {
-	return p.Pages[name]
-}
-
-func (p *pageContainer) GetIndexPage() string {
-	return p.IndexPage
-}
-
-func AddPage(page Page) func(p PageContainer) {
-	return func(p PageContainer) {
-		p.AddPage(page)
+func (pc *pageContainer) GetChildren() []components.UIComponent {
+	var t []components.UIComponent
+	for _, child := range pc.children {
+		t = append(t, child)
 	}
+
+	return t
 }
+
+func (pc *pageContainer) FindChild(name string) (components.UIComponent, bool) {
+	child, ok := pc.children[name]
+	return child, ok
+}
+
+func (pc *pageContainer) Id() string {
+	return pc.id
+}
+
+func (pc *pageContainer) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range pc.children {
+		if child.Id() == id {
+			return child, true
+		}
+	}
+
+	return nil, false
+}
+
+func (pc *pageContainer) FindChildByType(name string, componentType string) (components.UIComponent, bool) {
+	child, ok := pc.children[name]
+	if !ok {
+		return nil, false
+	}
+
+	if child.Type().IsType(componentType) {
+		return child, true
+	}
+
+	return nil, false
+}
+
+func (pc *pageContainer) SetParent(parent components.UIComponent) {
+	pc.parent = parent
+}
+
+func (pc *pageContainer) GetParent() components.UIComponent {
+	return pc.parent
+}
+
+func (pc *pageContainer) AddChild(child components.UIComponent) error {
+	if !child.Type().Is(components.PageType) {
+		logger.L.Error("PageContainer.WithPages: wrong type of page", zap.String("page", child.Name()),
+			zap.String("type", child.Type().TypeName()))
+
+		return components.ErrWrongChildType(child.Name(), components.PageType.TypeName(), child.Type().TypeName())
+	}
+
+	_, exists := pc.children[child.Name()]
+	if exists {
+		return components.ErrChildExists(child.Name())
+	}
+
+	child.SetParent(pc)
+	pc.children[child.Name()] = child
+
+	return nil
+}
+
+func (pc *pageContainer) KillChild(child components.UIComponent) error {
+	_, exists := pc.children[child.Name()]
+	if !exists {
+		return components.ErrChildNotFound(child.Name())
+	}
+
+	delete(pc.children, child.Name())
+
+	return nil
+}
+
+// PageContainer interface implementation
+
+func (pc *pageContainer) setImagePath(path string) {
+	pc.imagePath = path
+}
+
+func (pc *pageContainer) GetImagePath() string {
+	return pc.imagePath
+}
+
+func (pc *pageContainer) SetIndexPage(indexPage string) {
+	pc.indexPage = indexPage
+}
+
+func (pc *pageContainer) GetIndexPage() string {
+	return pc.indexPage
+}
+
+func (pc *pageContainer) WithPages(pages ...components.UIComponent) PageContainer {
+	for _, pg := range pages {
+		pc.AddChild(pg)
+	}
+
+	return pc
+}
+
+// Setters
 
 func SetIndexPage(indexPage string) func(p PageContainer) {
 	return func(p PageContainer) {
@@ -89,65 +206,4 @@ func SetContainerImagePath(path string) func(p PageContainer) {
 	return func(p PageContainer) {
 		p.setImagePath(path)
 	}
-}
-
-func NewPageContainer(
-	name string, setters ...func(
-		p PageContainer,
-	),
-) PageContainer {
-	var p pageContainer
-
-	p.Pages = make(map[string]Page)
-	p.Name = name
-	p.ContainerRoute = "/" + p.Name
-
-	for _, setter := range setters {
-		setter(&p)
-	}
-
-	return &p
-}
-
-func (p *pageContainer) GetName() string {
-	return p.Name
-}
-
-func (p *pageContainer) GetRoute() string {
-	return p.ContainerRoute
-}
-
-func (p *pageContainer) generatePagesDescriptor() []models.PagesDescriptor {
-	var pagesDescriptor []models.PagesDescriptor
-	for _, page := range p.Pages {
-		pagesDescriptor = append(
-			pagesDescriptor, models.PagesDescriptor{
-				Name:     page.GetName(),
-				Route:    page.GetRoute(),
-				Template: page.Encode(),
-			},
-		)
-	}
-
-	return pagesDescriptor
-}
-
-func (p *pageContainer) AddPage(page Page) {
-	page.AddParentPath(p.ContainerRoute)
-
-	p.Pages[page.GetName()] = page
-}
-
-func (p *pageContainer) GetPages() map[string]Page {
-	return p.Pages
-}
-
-func (p *pageContainer) Encode(page string) templ.Component {
-
-	descriptor := p.generatePagesDescriptor()
-	pageTemplate := p.Pages[page].Encode()
-
-	pContainer := templates.PageContainer(pageTemplate, descriptor)
-
-	return pContainer
 }

@@ -1,16 +1,14 @@
 package form
 
 import (
-	"github.com/Alfagov/goDashboard/htmx"
+	"errors"
 	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
 )
 
-func (fw *formImpl) handlePost(c FormRequest) *models.UpdateResponse {
-	return fw.updateHandler(c)
-}
+// Form interface implementation
 
 func (fw *formImpl) addFormFields(field ...*models.FormField) {
 	fw.fields = append(fw.fields, field...)
@@ -25,7 +23,7 @@ func (fw *formImpl) addFormCheckboxes(checkbox ...*models.FormCheckbox) {
 }
 
 func (fw *formImpl) setUpdateHandler(
-	handler func(c FormRequest) *models.UpdateResponse,
+	handler func(c components.RequestWrapper) *models.UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
@@ -33,10 +31,6 @@ func (fw *formImpl) setUpdateHandler(
 
 func (fw *formImpl) setInitialValue(value models.UpdateResponse) {
 	fw.initialValue = value
-}
-
-func (fw *formImpl) getHtmx() htmx.HTMX {
-	return fw.htmxOpts
 }
 
 func (fw *formImpl) updateAction(data *models.UpdateResponse) templ.Component {
@@ -62,7 +56,17 @@ func (fw *formImpl) WithSettings(
 	return fw
 }
 
-func (fw *formImpl) Encode() templ.Component {
+// UIComponent interface implementation
+
+func (fw *formImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+
+	if req != nil && req.Method() == "POST" {
+		data := fw.updateHandler(req)
+		return &components.RenderResponse{
+			Component: fw.updateAction(data),
+		}
+	}
+
 	fields := fw.fields
 	buttons := fw.buttons
 	checkboxes := fw.checkboxes
@@ -72,28 +76,75 @@ func (fw *formImpl) Encode() templ.Component {
 		fieldsComponent = append(fieldsComponent, templates.FormField(field))
 	}
 
-	element := templates.GenericForm(
-		fw.baseWidget.GetName(),
-		fieldsComponent,
-		checkboxes,
-		buttons,
-		fw.baseWidget.GetLayout(),
-		fw.htmxOpts.GetHtmx(),
-	)
-
-	return element
+	return &components.RenderResponse{
+		Component: templates.GenericForm(
+			fw.Name(),
+			fieldsComponent,
+			checkboxes,
+			buttons,
+			fw.baseWidget.GetLayout(),
+			fw.htmxOpts.GetHtmx(),
+		),
+	}
 }
 
-func (fw *formImpl) CompileRoutes(router *fiber.App) {
-	router.Post(
-		fw.htmxOpts.GetUrl(), func(c *fiber.Ctx) error {
-			update := fw.handlePost(NewFormRequest(c))
-
-			return c.Render("", fw.updateAction(update))
-		},
-	)
+func (fw *formImpl) Type() components.NodeType {
+	return components.FormWidgetType
 }
 
-func (fw *formImpl) AddParentPath(path string) error {
-	return fw.htmxOpts.GetHtmx().AddBeforePath(path)
+func (fw *formImpl) Name() string {
+	return fw.baseWidget.GetName()
+}
+
+func (fw *formImpl) UpdateSpec() *models.TreeSpec {
+	route := components.GetRouteFromParents(fw)
+
+	fw.htmxOpts.AddBeforePath(route)
+	return &models.TreeSpec{
+		Name:        fw.Name(),
+		ImageRoute:  "",
+		Description: fw.description,
+		Route:       fw.htmxOpts.GetUrl(),
+		Children:    nil,
+	}
+}
+
+func (fw *formImpl) GetSpec() *models.TreeSpec {
+	return fw.spec
+}
+
+func (fw *formImpl) GetChildren() []components.UIComponent {
+	return nil
+}
+
+func (fw *formImpl) FindChild(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (fw *formImpl) Id() string {
+	return fw.baseWidget.GetId()
+}
+
+func (fw *formImpl) FindChildById(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (fw *formImpl) FindChildByType(string, string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (fw *formImpl) SetParent(parent components.UIComponent) {
+	fw.parent = parent
+}
+
+func (fw *formImpl) GetParent() components.UIComponent {
+	return fw.parent
+}
+
+func (fw *formImpl) AddChild(components.UIComponent) error {
+	return errors.New("not applicable")
+}
+
+func (fw *formImpl) KillChild(components.UIComponent) error {
+	return errors.New("not applicable")
 }

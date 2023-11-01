@@ -11,7 +11,7 @@ import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
 
-func IndexPage(name string, dashSvg string, navElements []models.ListElement, body templ.Component) templ.Component {
+func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
