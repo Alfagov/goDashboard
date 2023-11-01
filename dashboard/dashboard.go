@@ -17,6 +17,7 @@ import (
 var staticFiles embed.FS
 
 type dashboard struct {
+	id          string
 	name        string
 	image       string
 	description string
@@ -28,6 +29,7 @@ type dashboard struct {
 
 type Dashboard interface {
 	Run() error
+	WithPages(pages ...components.UIComponent) Dashboard
 }
 
 func NewDashboard(name string, img string) Dashboard {

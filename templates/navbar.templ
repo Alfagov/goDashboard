@@ -2,7 +2,7 @@ package templates
 
 import "github.com/Alfagov/goDashboard/models"
 
-templ NavbarWidget(name string, dashSvg string, elements []models.ListElement) {
+templ NavbarWidget(name string, dashSvg string, elements []*models.TreeSpec) {
     <header class="flex h-16 items-center border-b px-4 md:px-6 bg-zinc-100/40">
     <nav class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
       <a class="flex items-center gap-2 text-lg font-semibold md:text-base" href="/">
@@ -18,7 +18,7 @@ templ NavbarWidget(name string, dashSvg string, elements []models.ListElement) {
 
 }
 
-templ navField(element models.ListElement) {
+templ navField(element *models.TreeSpec) {
 
     if len(element.Children) > 0 {
         @Dropdown(element)
@@ -28,7 +28,7 @@ templ navField(element models.ListElement) {
 
 }
 
-templ Dropdown(element models.ListElement) {
+templ Dropdown(element *models.TreeSpec) {
     <div class="dropdown relative">
         <button class="dropdown-btn text-black hover:text-gray-500">{ element.Name }</button>
         <div class="dropdown-menu z-10 hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">

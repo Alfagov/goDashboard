@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/gofiber/fiber/v2"
@@ -9,7 +10,7 @@ import (
 )
 
 func (d *dashboard) CreateRoutes() {
-	d.Router.Get("/:container/:page/:widget", func(c *fiber.Ctx) error {
+	d.Router.Get("/:container/:page/widget/:widget", func(c *fiber.Ctx) error {
 
 		container, ok := d.FindChildByType(c.Params("container"), "container")
 		if !ok {
@@ -21,26 +22,7 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		widget, ok := page.FindChild(c.Params("widget"))
-
-		responseTemplate := widget.Render(components.NewReqWrapper(c))
-
-		return c.Render("", responseTemplate)
-	})
-
-	d.Router.Post("/:container/:page/:widget", func(c *fiber.Ctx) error {
-
-		container, ok := d.FindChildByType(c.Params("container"), "container")
-		if !ok {
-			return c.SendStatus(404)
-		}
-
-		page, ok := container.FindChildByType(c.Params("page"), "page")
-		if !ok {
-			return c.SendStatus(404)
-		}
-
-		widget, ok := page.FindChild(c.Params("widget"))
+		widget, ok := page.FindChildById(c.Params("widget"))
 
 		responseTemplate := widget.Render(components.NewReqWrapper(c))
 
@@ -51,20 +33,8 @@ func (d *dashboard) CreateRoutes() {
 		return c.Render("", responseTemplate.Component)
 	})
 
-	d.Router.Get("/:page/:widget", func(c *fiber.Ctx) error {
-		page, ok := d.FindChildByType(c.Params("page"), "page")
-		if !ok {
-			return c.SendStatus(404)
-		}
+	d.Router.Post("/:container/:page/widget/:widget", func(c *fiber.Ctx) error {
 
-		widget, ok := page.FindChild(c.Params("widget"))
-
-		responseTemplate := widget.Render(components.NewReqWrapper(c))
-
-		return c.Render("", responseTemplate.Component)
-	})
-
-	d.Router.Get("/:container/:page", func(c *fiber.Ctx) error {
 		container, ok := d.FindChildByType(c.Params("container"), "container")
 		if !ok {
 			return c.SendStatus(404)
@@ -75,7 +45,45 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		responseTemplate := templates.PageContainer(page.Render(nil).Component, page.GetSpec().Children)
+		widget, ok := page.FindChildById(c.Params("widget"))
+
+		responseTemplate := widget.Render(components.NewReqWrapper(c))
+
+		if responseTemplate.Json != nil {
+			return c.JSON(responseTemplate.Json)
+		}
+
+		return c.Render("", responseTemplate.Component)
+	})
+
+	d.Router.Get("/:page/widget/:widget", func(c *fiber.Ctx) error {
+		page, ok := d.FindChildByType(c.Params("page"), "page")
+		if !ok {
+			return c.SendStatus(404)
+		}
+
+		widget, ok := page.FindChildById(c.Params("widget"))
+
+		responseTemplate := widget.Render(components.NewReqWrapper(c))
+
+		return c.Render("", responseTemplate.Component)
+	})
+
+	d.Router.Get("/:container/:page", func(c *fiber.Ctx) error {
+		logger.L.Info("Page container page called")
+		container, ok := d.FindChildByType(c.Params("container"), "container")
+		if !ok {
+			return c.SendStatus(404)
+		}
+
+		page, ok := container.FindChildByType(c.Params("page"), "page")
+		if !ok {
+			return c.SendStatus(404)
+		}
+
+		responseTemplate := templates.PageContainer(page.Render(components.NewReqWrapper(c)).Component, page.GetSpec().Children)
+
+		responseTemplate = templates.IndexPage(d.name, d.image, container.GetSpec().Children, responseTemplate)
 
 		return c.Render("", responseTemplate)
 	})

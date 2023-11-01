@@ -4,7 +4,10 @@ import (
 	"errors"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/a-h/templ"
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gofiber/fiber/v2"
+	"os"
 )
 
 var (
@@ -38,6 +41,11 @@ type UIComponent interface {
 	FindChildByType(name string, componentType string) (UIComponent, bool)
 	// GetParent returns a pointer to the parent of the component
 	GetParent() UIComponent
+
+	// Id returns the id of the component
+	Id() string
+	// FindChildById returns the child with the given id
+	FindChildById(id string) (UIComponent, bool)
 
 	// SetParent sets the parent of the component
 	SetParent(parent UIComponent)
@@ -75,7 +83,7 @@ func GetRouteFromParents(n UIComponent) string {
 		if parent == nil || parent.Type().Is(DashboardType) {
 			break
 		}
-		route = route + parent.Name() + "/"
+		route = parent.Name() + "/" + route
 		parent = parent.GetParent()
 	}
 
@@ -131,4 +139,45 @@ type NodeType interface {
 	TypeName() string
 	Is(cmp NodeType) bool
 	IsType(typeName string) bool
+}
+
+func VisualizeTree(tree UIComponent) {
+	treeChart := charts.NewTree()
+	treeChart.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{Theme: "white"}),
+		charts.WithTitleOpts(opts.Title{Title: "Tree-Visualize"}),
+	)
+
+	nodes := TreeSpecToChartNodes(tree.GetSpec())
+
+	treeChart.AddSeries("tree", nodes)
+
+	f, _ := os.Create("tree.html")
+	treeChart.Render(f)
+}
+
+func TreeSpecToChartNodes(spec *models.TreeSpec) []opts.TreeData {
+	var nodes []opts.TreeData
+	for _, child := range spec.Children {
+		nodes = append(nodes, opts.TreeData{
+			Name:     child.Name,
+			Value:    1,
+			Children: treeSpecToChartNodes(child),
+		})
+	}
+
+	return nodes
+}
+
+func treeSpecToChartNodes(spec *models.TreeSpec) []*opts.TreeData {
+	var nodes []*opts.TreeData
+	for _, child := range spec.Children {
+		nodes = append(nodes, &opts.TreeData{
+			Name:     child.Name,
+			Value:    1,
+			Children: treeSpecToChartNodes(child),
+		})
+	}
+
+	return nodes
 }

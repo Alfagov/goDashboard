@@ -11,7 +11,7 @@ import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
 
-func NavbarWidget(name string, dashSvg string, elements []models.ListElement) templ.Component {
+func NavbarWidget(name string, dashSvg string, elements []*models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -70,7 +70,7 @@ func NavbarWidget(name string, dashSvg string, elements []models.ListElement) te
 	})
 }
 
-func navField(element models.ListElement) templ.Component {
+func navField(element *models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -119,7 +119,7 @@ func navField(element models.ListElement) templ.Component {
 	})
 }
 
-func Dropdown(element models.ListElement) templ.Component {
+func Dropdown(element *models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {

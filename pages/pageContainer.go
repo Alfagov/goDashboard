@@ -8,6 +8,7 @@ import (
 
 // PageContainer is a container for pages
 type pageContainer struct {
+	id          string
 	name        string
 	imagePath   string
 	description string
@@ -19,10 +20,12 @@ type pageContainer struct {
 }
 
 type PageContainer interface {
+	components.UIComponent
 	setImagePath(path string)
 	GetIndexPage() string
 	SetIndexPage(indexPage string)
 	GetImagePath() string
+	WithPages(pages ...components.UIComponent) PageContainer
 }
 
 func NewPageContainer(
@@ -98,6 +101,20 @@ func (pc *pageContainer) FindChild(name string) (components.UIComponent, bool) {
 	return child, ok
 }
 
+func (p *pageContainer) Id() string {
+	return p.id
+}
+
+func (p *pageContainer) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range p.children {
+		if child.Id() == id {
+			return child, true
+		}
+	}
+
+	return nil, false
+}
+
 func (pc *pageContainer) FindChildByType(name string, componentType string) (components.UIComponent, bool) {
 	child, ok := pc.children[name]
 	if !ok {
@@ -158,6 +175,14 @@ func (pc *pageContainer) SetIndexPage(indexPage string) {
 
 func (pc *pageContainer) GetIndexPage() string {
 	return pc.indexPage
+}
+
+func (pc *pageContainer) WithPages(pages ...components.UIComponent) PageContainer {
+	for _, pg := range pages {
+		pc.AddChild(pg)
+	}
+
+	return pc
 }
 
 // Setters

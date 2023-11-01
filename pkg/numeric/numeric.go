@@ -26,7 +26,26 @@ type numeric struct {
 	parent        components.UIComponent
 }
 
-func (n *numeric) Render(components.RequestWrapper) *components.RenderResponse {
+func (n *numeric) Render(req components.RequestWrapper) *components.RenderResponse {
+
+	if req != nil {
+		value, err := n.handleUpdate()
+		if err != nil {
+			return &components.RenderResponse{
+				Err: err,
+			}
+		}
+
+		return &components.RenderResponse{
+			Component: templates.NumericWidget(
+				n.baseWidget.GetName(),
+				strconv.Itoa(value),
+				n.unit,
+				n.unitAfter,
+				n.htmxOpts.GetHtmx(),
+				n.baseWidget.GetLayout()),
+		}
+	}
 
 	return &components.RenderResponse{
 		Component: templates.NumericWidget(
@@ -72,6 +91,14 @@ func (n *numeric) FindChild(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
+func (n *numeric) Id() string {
+	return n.baseWidget.GetId()
+}
+
+func (n *numeric) FindChildById(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
 func (n *numeric) FindChildByType(string, string) (components.UIComponent, bool) {
 	return nil, false
 }
@@ -96,6 +123,7 @@ func (n *numeric) KillChild(components.UIComponent) error {
 // The type implementing this interface can set and update values, handle unit formatting,
 // and additionally has methods to interface with templates, routes, and HTMX.
 type Numeric interface {
+	components.UIComponent
 
 	// setUpdateHandler sets a handler function that returns an integer and an error.
 	// This handler function runs when an update operation is called for the implementing type.
@@ -164,7 +192,7 @@ func NewNumeric(
 	id := "numericWidget_" + ulid.Make().String()
 	widget.baseWidget.SetId(id)
 
-	widget.htmxOpts.AppendToPath("update", id)
+	widget.htmxOpts.AppendToPath("widget", id)
 	widget.htmxOpts.SetInterval(updateInterval.String())
 	widget.htmxOpts.SetTarget("this")
 	widget.htmxOpts.SetSwap("outerHTML")

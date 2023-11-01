@@ -23,7 +23,17 @@ func (d *dashboard) Run() error {
 
 	d.treeSpec = d.UpdateSpec()
 
+	components.VisualizeTree(d)
+
 	return d.Router.Listen(dashboardUrl)
+}
+
+func (d *dashboard) WithPages(pages ...components.UIComponent) Dashboard {
+	for _, page := range pages {
+		d.AddChild(page)
+	}
+
+	return d
 }
 
 // UIComponent interface implementation
@@ -67,6 +77,20 @@ func (d *dashboard) FindChildByType(name string, componentType string) (componen
 	}
 
 	return child, true
+}
+
+func (p *dashboard) Id() string {
+	return p.id
+}
+
+func (p *dashboard) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range p.Children {
+		if child.Id() == id {
+			return child, true
+		}
+	}
+
+	return nil, false
 }
 
 func (d *dashboard) SetParent(components.UIComponent) {}

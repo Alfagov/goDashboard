@@ -12,6 +12,7 @@ import (
 
 // GraphWidget represents an interface for a widget in the graph UI.
 type GraphWidget interface {
+	components.UIComponent
 
 	// update method returns a map representing the state of the GraphWidget.
 	update() map[string]interface{}
@@ -31,7 +32,7 @@ type graphWidgetImpl struct {
 }
 
 func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.RenderResponse {
-	if req.Method() == "POST" {
+	if req != nil {
 		return &components.RenderResponse{
 			Json: g.update(),
 		}
@@ -84,6 +85,14 @@ func (g *graphWidgetImpl) FindChildByType(string, string) (components.UIComponen
 	return nil, false
 }
 
+func (g *graphWidgetImpl) Id() string {
+	return g.baseWidget.GetId()
+}
+
+func (g *graphWidgetImpl) FindChildById(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
 func (g *graphWidgetImpl) SetParent(parent components.UIComponent) {
 	g.parent = parent
 }
@@ -126,7 +135,7 @@ func NewGraphWidget(
 
 	w.baseWidget.SetId(id)
 	w.baseWidget.SetName(name)
-	w.htmxOpts.AppendToPath("graph", id)
+	w.htmxOpts.AppendToPath("widget", id)
 
 	return w
 }

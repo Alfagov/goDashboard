@@ -9,6 +9,7 @@ import (
 
 // page is a container of widgets
 type page struct {
+	id          string
 	name        string
 	description string
 	imagePath   string
@@ -19,9 +20,11 @@ type page struct {
 }
 
 type Page interface {
+	components.UIComponent
 	setName(name string)
 	setImagePath(path string)
 	GetImagePath() string
+	WithWidgets(widgets ...components.UIComponent) Page
 }
 
 func NewPage(name string, setters ...func(p Page)) Page {
@@ -55,6 +58,8 @@ func (p *page) UpdateSpec() *models.TreeSpec {
 		Route:       route + p.name,
 		Children:    childrenSpec,
 	}
+
+	p.spec = spec
 
 	return spec
 }
@@ -111,6 +116,20 @@ func (p *page) FindChildByType(name string, componentType string) (components.UI
 	return nil, false
 }
 
+func (p *page) Id() string {
+	return p.id
+}
+
+func (p *page) FindChildById(id string) (components.UIComponent, bool) {
+	for _, child := range p.children {
+		if child.Id() == id {
+			return child, true
+		}
+	}
+
+	return nil, false
+}
+
 func (p *page) SetParent(parent components.UIComponent) {
 	p.parent = parent
 }
@@ -158,6 +177,17 @@ func (p *page) setImagePath(path string) {
 
 func (p *page) setName(name string) {
 	p.name = name
+}
+
+func (p *page) WithWidgets(widgets ...components.UIComponent) Page {
+	for _, widget := range widgets {
+		if widget.Type().SuperType() != "widgets" {
+			panic("cannot add non-widget component to page")
+		}
+		p.AddChild(widget)
+	}
+
+	return p
 }
 
 // SETTERS

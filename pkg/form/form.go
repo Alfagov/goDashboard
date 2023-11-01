@@ -14,6 +14,7 @@ import (
 // Form is an interface that defines a structure for form-based components.
 // It provides methods to modify, display and handle form-related actions.
 type Form interface {
+	components.UIComponent
 
 	// setUpdateHandler sets a custom handler used to handle the form update request.
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
@@ -118,6 +119,14 @@ func (fw *formImpl) FindChild(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
+func (fw *formImpl) Id() string {
+	return fw.baseWidget.GetId()
+}
+
+func (fw *formImpl) FindChildById(id string) (components.UIComponent, bool) {
+	return nil, false
+}
+
 func (fw *formImpl) FindChildByType(string, string) (components.UIComponent, bool) {
 	return nil, false
 }
@@ -155,7 +164,7 @@ func NewFormWidget(name string, setters ...func(n widgets.Widget)) Form {
 
 	id := "formWidget_" + name + "_" + ulid.Make().String()
 	widget.baseWidget.SetId(id)
-	widget.htmxOpts.AppendToPath("update", id)
+	widget.htmxOpts.AppendToPath("widget", id)
 
 	return widget
 }
