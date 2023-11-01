@@ -1,11 +1,13 @@
 package graphContainer
 
 import (
+	"errors"
 	"github.com/Alfagov/goDashboard/htmx"
+	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/graph"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
-	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
+	"github.com/Alfagov/goDashboard/templates"
 )
 
 // GraphWidget represents an interface for a widget in the graph UI.
@@ -14,29 +16,88 @@ type GraphWidget interface {
 	// update method returns a map representing the state of the GraphWidget.
 	update() map[string]interface{}
 
-	// getHtmx method returns an HTMX object associated with the GraphWidget.
-	getHtmx() htmx.HTMX
-
 	// WithSettings method is used to update the GraphWidget's settings.
 	// It accepts a variable number of functions that mutate the GraphWidget.
 	WithSettings(settings ...func(gw GraphWidget)) GraphWidget
-
-	// CompileRoutes method registers the necessary routes with the provided *fiber.App.
-	CompileRoutes(router *fiber.App)
-
-	// AddParentPath method appends a new path to the GraphWidget's parent
-	// paths list.
-	//It returns an error in case of failure.
-	AddParentPath(path string) error
-
-	// Encode method returns a templ.Component which represents the GraphWidget's HTML component.
-	Encode() templ.Component
 }
 
 type graphWidgetImpl struct {
-	baseWidget widgets.Widget
-	htmxOpts   htmx.HTMX
-	graph      graph.Graph
+	baseWidget  widgets.Widget
+	parent      components.UIComponent
+	description string
+	specs       *models.TreeSpec
+	htmxOpts    htmx.HTMX
+	graph       graph.Graph
+}
+
+func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+	if req.Method() == "POST" {
+		return &components.RenderResponse{
+			Json: g.update(),
+		}
+	}
+
+	return &components.RenderResponse{
+		Component: templates.GeneralGraph(
+			g.baseWidget.GetId(),
+			g.graph.Encode(g.baseWidget.GetLayout().Height),
+			g.baseWidget.GetLayout(),
+			g.htmxOpts.GetHtmx(),
+		),
+	}
+}
+
+func (g *graphWidgetImpl) Type() components.NodeType {
+	return components.GraphWidgetType
+}
+
+func (g *graphWidgetImpl) Name() string {
+	return g.baseWidget.GetName()
+}
+
+func (g *graphWidgetImpl) UpdateSpec() *models.TreeSpec {
+	route := components.GetRouteFromParents(g)
+
+	g.htmxOpts.AddBeforePath(route)
+	return &models.TreeSpec{
+		Name:        g.Name(),
+		ImageRoute:  "",
+		Description: g.description,
+		Route:       g.htmxOpts.GetUrl(),
+		Children:    nil,
+	}
+}
+
+func (g *graphWidgetImpl) GetSpec() *models.TreeSpec {
+	return g.specs
+}
+
+func (g *graphWidgetImpl) GetChildren() []components.UIComponent {
+	return nil
+}
+
+func (g *graphWidgetImpl) FindChild(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (g *graphWidgetImpl) FindChildByType(string, string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (g *graphWidgetImpl) SetParent(parent components.UIComponent) {
+	g.parent = parent
+}
+
+func (g *graphWidgetImpl) GetParent() components.UIComponent {
+	return g.parent
+}
+
+func (g *graphWidgetImpl) AddChild(components.UIComponent) error {
+	return errors.New("not applicable")
+}
+
+func (g *graphWidgetImpl) KillChild(components.UIComponent) error {
+	return errors.New("not applicable")
 }
 
 func newGraphWidget() *graphWidgetImpl {

@@ -1,11 +1,16 @@
 package numeric
 
 import (
+	"errors"
 	"github.com/Alfagov/goDashboard/htmx"
+	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
+	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"github.com/oklog/ulid/v2"
+	"strconv"
 	"time"
 )
 
@@ -14,8 +19,77 @@ type numeric struct {
 	updateHandler func() (int, error)
 	initialValue  int
 	unit          string
+	description   string
 	unitAfter     bool
 	htmxOpts      htmx.HTMX
+	spec          *models.TreeSpec
+	parent        components.UIComponent
+}
+
+func (n *numeric) Render(components.RequestWrapper) *components.RenderResponse {
+
+	return &components.RenderResponse{
+		Component: templates.NumericWidget(
+			n.baseWidget.GetName(),
+			strconv.Itoa(n.initialValue),
+			n.unit,
+			n.unitAfter,
+			n.htmxOpts.GetHtmx(),
+			n.baseWidget.GetLayout()),
+	}
+}
+
+func (n *numeric) Type() components.NodeType {
+	return components.NumericWidgetType
+}
+
+func (n *numeric) Name() string {
+	return n.baseWidget.GetName()
+}
+
+func (n *numeric) UpdateSpec() *models.TreeSpec {
+	route := components.GetRouteFromParents(n)
+
+	n.htmxOpts.AddBeforePath(route)
+	return &models.TreeSpec{
+		Name:        n.Name(),
+		ImageRoute:  "",
+		Description: n.description,
+		Route:       n.htmxOpts.GetUrl(),
+		Children:    nil,
+	}
+}
+
+func (n *numeric) GetSpec() *models.TreeSpec {
+	return n.spec
+}
+
+func (n *numeric) GetChildren() []components.UIComponent {
+	return nil
+}
+
+func (n *numeric) FindChild(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (n *numeric) FindChildByType(string, string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (n *numeric) SetParent(parent components.UIComponent) {
+	n.parent = parent
+}
+
+func (n *numeric) GetParent() components.UIComponent {
+	return n.parent
+}
+
+func (n *numeric) AddChild(components.UIComponent) error {
+	return errors.New("numeric widget cannot have children")
+}
+
+func (n *numeric) KillChild(components.UIComponent) error {
+	return errors.New("numeric widget cannot have children")
 }
 
 // Numeric is an interface that defines methods for numeric-based components.
@@ -45,18 +119,10 @@ type Numeric interface {
 	// WithSettings accepts a series of settings functions and applies them to the implementing type,
 	// returning the modified implementing type.
 	WithSettings(settings ...func(f Numeric)) Numeric
+}
 
-	// Encode translates the implementing type into a templ.Component for usage in templates.
-	Encode() templ.Component
-
-	// getHtmx returns an htmx.HTMX related to the implementing type.
-	getHtmx() htmx.HTMX
-
-	// CompileRoutes adds routes to the router for the implementing type.
-	CompileRoutes(router *fiber.App)
-
-	// AddParentPath adds a parent path string to the implementing type and returns an error if this operation fails.
-	AddParentPath(path string) error
+func (n *numeric) GetName() string {
+	return n.baseWidget.GetName()
 }
 
 func (n *numeric) AddParentPath(path string) error {

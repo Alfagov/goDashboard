@@ -8,12 +8,12 @@ type PagesDescriptor struct {
 	Template templ.Component
 }
 
-type PageSpec struct {
+type TreeSpec struct {
 	Name        string
 	ImageRoute  string
 	Description string
 	Route       string
-	Pages       []PageSpec
+	Children    []*TreeSpec
 }
 
 type ListElement struct {

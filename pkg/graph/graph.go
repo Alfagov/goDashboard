@@ -64,7 +64,7 @@ func (bg *barGraphImpl) Encode(h int) templ.Component {
 }
 
 func (lg *lineGraphImpl) Encode(h int) templ.Component {
-	g := lineGraphFromData(lg.dataHandler(), false)
+	g := lineGraphFromData(lg.dataHandler())
 	g.ChartID = lg.Id
 	if lg.tBox != nil {
 		g.SetGlobalOptions(
@@ -85,7 +85,7 @@ func (bg *barGraphImpl) HandleUpdate() map[string]interface{} {
 }
 
 func (lg *lineGraphImpl) HandleUpdate() map[string]interface{} {
-	g := lineGraphFromData(lg.dataHandler(), false)
+	g := lineGraphFromData(lg.dataHandler())
 
 	data := g.JSON()
 	data["id"] = lg.Id

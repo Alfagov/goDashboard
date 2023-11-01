@@ -40,7 +40,7 @@ func barGraphFromData(data *models.BarGraphData, stacked bool) *charts.Bar {
 	return graph
 }
 
-func lineGraphFromData(data *models.LineGraphData, stacked bool) *charts.Line {
+func lineGraphFromData(data *models.LineGraphData) *charts.Line {
 
 	graph := charts.NewLine()
 

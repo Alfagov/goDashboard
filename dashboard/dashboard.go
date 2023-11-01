@@ -5,7 +5,7 @@ import (
 	"github.com/Alfagov/goDashboard/config"
 	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
-	"github.com/Alfagov/goDashboard/pages"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/utils"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
@@ -17,24 +17,20 @@ import (
 var staticFiles embed.FS
 
 type dashboard struct {
-	Name           string
-	Image          string
-	Router         *fiber.App
-	Pages          map[string]pages.Page
-	PageContainers map[string]pages.PageContainer
-	PagesSpec      []models.PageSpec
-	IndexPage      func(body templ.Component) templ.Component
+	name        string
+	image       string
+	description string
+	Router      *fiber.App
+	treeSpec    *models.TreeSpec
+	IndexPage   func(body templ.Component) templ.Component
+	Children    map[string]components.UIComponent
 }
 
 type Dashboard interface {
-	AddPage(page pages.Page)
-	AddPageContainer(pageContainer pages.PageContainer)
-	Compile()
 	Run() error
 }
 
 func NewDashboard(name string, img string) Dashboard {
-
 	app := fiber.New(fiber.Config{Views: &utils.TemplRender{}})
 
 	app.Use(fLogger.New())
@@ -53,11 +49,10 @@ func NewDashboard(name string, img string) Dashboard {
 	)
 
 	return &dashboard{
-		Name:           name,
-		Image:          img,
-		Router:         app,
-		Pages:          make(map[string]pages.Page),
-		PageContainers: make(map[string]pages.PageContainer),
+		name:     name,
+		image:    img,
+		Router:   app,
+		Children: make(map[string]components.UIComponent),
 	}
 }
 

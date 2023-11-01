@@ -11,7 +11,7 @@ import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
 
-func Aside(descriptor []models.PagesDescriptor) templ.Component {
+func Aside(descriptor []*models.TreeSpec) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {

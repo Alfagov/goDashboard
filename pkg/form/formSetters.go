@@ -1,6 +1,9 @@
 package form
 
-import "github.com/Alfagov/goDashboard/models"
+import (
+	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
+)
 
 func SetFormInitialValue(value models.UpdateResponse) func(f Form) {
 	return func(f Form) {
@@ -8,7 +11,7 @@ func SetFormInitialValue(value models.UpdateResponse) func(f Form) {
 	}
 }
 
-func SetFormUpdateHandler(handler func(c FormRequest) *models.UpdateResponse) func(
+func SetFormUpdateHandler(handler func(c components.RequestWrapper) *models.UpdateResponse) func(
 	f Form,
 ) {
 	return func(f Form) {

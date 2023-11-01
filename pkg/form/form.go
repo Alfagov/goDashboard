@@ -1,11 +1,13 @@
 package form
 
 import (
+	"errors"
 	"github.com/Alfagov/goDashboard/htmx"
 	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
+	"github.com/Alfagov/goDashboard/templates"
 	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -13,9 +15,9 @@ import (
 // It provides methods to modify, display and handle form-related actions.
 type Form interface {
 
-	// setUpdateHandler sets a custom handler that is used to handle the form update request.
-	// It receives a FormRequest and returns an UpdateResponse.
-	setUpdateHandler(handler func(c FormRequest) *models.UpdateResponse)
+	// setUpdateHandler sets a custom handler used to handle the form update request.
+	// It receives a components.RequestWrapper and returns an UpdateResponse.
+	setUpdateHandler(handler func(c components.RequestWrapper) *models.UpdateResponse)
 
 	// setInitialValue sets the initial value for the form.
 	// It takes an UpdateResponse as its argument.
@@ -30,30 +32,13 @@ type Form interface {
 	// addFormCheckboxes allows adding multiple checkboxes to the form.
 	addFormCheckboxes(checkbox ...*models.FormCheckbox)
 
-	// handlePost handles the POST request of the form.
-	// Returns an UpdateResponse after the form data has been processed.
-	handlePost(c FormRequest) *models.UpdateResponse
-
 	// updateAction defines the update action for the form.
 	// Returns a template component for rendering.
 	updateAction(data *models.UpdateResponse) templ.Component
 
-	// getHtmx returns the HTMX instance for the form.
-	getHtmx() htmx.HTMX
-
 	// WithSettings allows applying multiple settings to the form.
 	// Returns the modified form.
 	WithSettings(settings ...func(f Form)) Form
-
-	// Encode transforms form into a template component for rendering.
-	Encode() templ.Component
-
-	// CompileRoutes adds the form-related routes to the provided router.
-	CompileRoutes(router *fiber.App)
-
-	// AddParentPath adds a parent path to the current form path.
-	// Returns error if any.
-	AddParentPath(path string) error
 }
 
 type formImpl struct {
@@ -61,10 +46,96 @@ type formImpl struct {
 	fields        []*models.FormField
 	buttons       []*models.FormButton
 	checkboxes    []*models.FormCheckbox
-	updateHandler func(c FormRequest) *models.UpdateResponse
+	updateHandler func(c components.RequestWrapper) *models.UpdateResponse
 	initialValue  models.UpdateResponse
+	description   string
+	spec          *models.TreeSpec
+	parent        components.UIComponent
 	popUpResponse bool
 	htmxOpts      htmx.HTMX
+}
+
+func (fw *formImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+
+	if req != nil && req.Method() == "POST" {
+		data := fw.updateHandler(req)
+		return &components.RenderResponse{
+			Component: fw.updateAction(data),
+		}
+	}
+
+	fields := fw.fields
+	buttons := fw.buttons
+	checkboxes := fw.checkboxes
+
+	var fieldsComponent []templ.Component
+	for _, field := range fields {
+		fieldsComponent = append(fieldsComponent, templates.FormField(field))
+	}
+
+	return &components.RenderResponse{
+		Component: templates.GenericForm(
+			fw.Name(),
+			fieldsComponent,
+			checkboxes,
+			buttons,
+			fw.baseWidget.GetLayout(),
+			fw.htmxOpts.GetHtmx(),
+		),
+	}
+}
+
+func (fw *formImpl) Type() components.NodeType {
+	return components.FormWidgetType
+}
+
+func (fw *formImpl) Name() string {
+	return fw.baseWidget.GetName()
+}
+
+func (fw *formImpl) UpdateSpec() *models.TreeSpec {
+	route := components.GetRouteFromParents(fw)
+
+	fw.htmxOpts.AddBeforePath(route)
+	return &models.TreeSpec{
+		Name:        fw.Name(),
+		ImageRoute:  "",
+		Description: fw.description,
+		Route:       fw.htmxOpts.GetUrl(),
+		Children:    nil,
+	}
+}
+
+func (fw *formImpl) GetSpec() *models.TreeSpec {
+	return fw.spec
+}
+
+func (fw *formImpl) GetChildren() []components.UIComponent {
+	return nil
+}
+
+func (fw *formImpl) FindChild(string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (fw *formImpl) FindChildByType(string, string) (components.UIComponent, bool) {
+	return nil, false
+}
+
+func (fw *formImpl) SetParent(parent components.UIComponent) {
+	fw.parent = parent
+}
+
+func (fw *formImpl) GetParent() components.UIComponent {
+	return fw.parent
+}
+
+func (fw *formImpl) AddChild(components.UIComponent) error {
+	return errors.New("not applicable")
+}
+
+func (fw *formImpl) KillChild(components.UIComponent) error {
+	return errors.New("not applicable")
 }
 
 func newForm() *formImpl {

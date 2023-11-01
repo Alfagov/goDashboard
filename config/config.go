@@ -12,7 +12,7 @@ var C Config
 
 func InitConfig() error {
 
-	var t_config Config
+	var tConfig Config
 
 	fileName := os.Getenv("GD_CONFIG_NAME")
 	extension := os.Getenv("GD_CONFIG_TYPE")
@@ -28,18 +28,18 @@ func InitConfig() error {
 
 	switch extension {
 	case "yaml":
-		err = yaml.Unmarshal(file, &t_config)
+		err = yaml.Unmarshal(file, &tConfig)
 		if err != nil {
 			logger.L.Error("Error unmarshaling yaml", zap.Error(err))
 		}
 	case "json":
-		err = json.Unmarshal(file, &t_config)
+		err = json.Unmarshal(file, &tConfig)
 		if err != nil {
 			logger.L.Error("Error unmarshaling json", zap.Error(err))
 		}
 	}
 
-	C = t_config
+	C = tConfig
 
 	return nil
 }
