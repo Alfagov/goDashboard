@@ -10,30 +10,22 @@ import (
 
 // Form interface implementation
 
-func (fw *formImpl) addFormFields(field ...*models.FormField) {
+func (fw *formImpl[F]) addFormFields(field ...models.Field) {
 	fw.fields = append(fw.fields, field...)
 }
 
-func (fw *formImpl) addFormButtons(button ...*models.FormButton) {
-	fw.buttons = append(fw.buttons, button...)
-}
-
-func (fw *formImpl) addFormCheckboxes(checkbox ...*models.FormCheckbox) {
-	fw.checkboxes = append(fw.checkboxes, checkbox...)
-}
-
-func (fw *formImpl) setUpdateHandler(
-	handler func(c components.RequestWrapper) *models.UpdateResponse,
+func (fw *formImpl[F]) setUpdateHandler(
+	handler func(c F) *models.UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
 }
 
-func (fw *formImpl) setInitialValue(value models.UpdateResponse) {
+func (fw *formImpl[F]) setInitialValue(value models.UpdateResponse) {
 	fw.initialValue = value
 }
 
-func (fw *formImpl) updateAction(data *models.UpdateResponse) templ.Component {
+func (fw *formImpl[F]) updateAction(data *models.UpdateResponse) templ.Component {
 
 	if !data.Success {
 		element := templates.ErrorAlert(data.Title, data.Message)
@@ -44,11 +36,11 @@ func (fw *formImpl) updateAction(data *models.UpdateResponse) templ.Component {
 	return element
 }
 
-func (fw *formImpl) WithSettings(
+func (fw *formImpl[F]) WithSettings(
 	settings ...func(
-		f Form,
+		f Form[F],
 	),
-) Form {
+) Form[F] {
 	for _, setter := range settings {
 		setter(fw)
 	}
@@ -56,23 +48,40 @@ func (fw *formImpl) WithSettings(
 	return fw
 }
 
+func (fw *formImpl[F]) process(req components.RequestWrapper) (*F, error) {
+
+	var data F
+	if req != nil {
+		err := req.BindFormRequest(&data)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &data, nil
+}
+
 // UIComponent interface implementation
 
-func (fw *formImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+func (fw *formImpl[F]) Render(req components.RequestWrapper) *components.RenderResponse {
 
 	if req != nil && req.Method() == "POST" {
-		data := fw.updateHandler(req)
+
+		inputData, err := fw.process(req)
+		if err != nil {
+			return &components.RenderResponse{
+				Err: err,
+			}
+		}
+
+		data := fw.updateHandler(*inputData)
 		return &components.RenderResponse{
 			Component: fw.updateAction(data),
 		}
 	}
 
-	fields := fw.fields
-	buttons := fw.buttons
-	checkboxes := fw.checkboxes
-
 	var fieldsComponent []templ.Component
-	for _, field := range fields {
+	for _, field := range fw.fields {
 		fieldsComponent = append(fieldsComponent, templates.FormField(field))
 	}
 
@@ -80,23 +89,21 @@ func (fw *formImpl) Render(req components.RequestWrapper) *components.RenderResp
 		Component: templates.GenericForm(
 			fw.Name(),
 			fieldsComponent,
-			checkboxes,
-			buttons,
 			fw.baseWidget.GetLayout(),
 			fw.htmxOpts.GetHtmx(),
 		),
 	}
 }
 
-func (fw *formImpl) Type() components.NodeType {
+func (fw *formImpl[F]) Type() components.NodeType {
 	return components.FormWidgetType
 }
 
-func (fw *formImpl) Name() string {
+func (fw *formImpl[F]) Name() string {
 	return fw.baseWidget.GetName()
 }
 
-func (fw *formImpl) UpdateSpec() *models.TreeSpec {
+func (fw *formImpl[F]) UpdateSpec() *models.TreeSpec {
 	route := components.GetRouteFromParents(fw)
 
 	fw.htmxOpts.AddBeforePath(route)
@@ -109,42 +116,42 @@ func (fw *formImpl) UpdateSpec() *models.TreeSpec {
 	}
 }
 
-func (fw *formImpl) GetSpec() *models.TreeSpec {
+func (fw *formImpl[F]) GetSpec() *models.TreeSpec {
 	return fw.spec
 }
 
-func (fw *formImpl) GetChildren() []components.UIComponent {
+func (fw *formImpl[F]) GetChildren() []components.UIComponent {
 	return nil
 }
 
-func (fw *formImpl) FindChild(string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChild(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) Id() string {
+func (fw *formImpl[F]) Id() string {
 	return fw.baseWidget.GetId()
 }
 
-func (fw *formImpl) FindChildById(string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChildById(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) FindChildByType(string, string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChildByType(string, string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) SetParent(parent components.UIComponent) {
+func (fw *formImpl[F]) SetParent(parent components.UIComponent) {
 	fw.parent = parent
 }
 
-func (fw *formImpl) GetParent() components.UIComponent {
+func (fw *formImpl[F]) GetParent() components.UIComponent {
 	return fw.parent
 }
 
-func (fw *formImpl) AddChild(components.UIComponent) error {
+func (fw *formImpl[F]) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (fw *formImpl) KillChild(components.UIComponent) error {
+func (fw *formImpl[F]) KillChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }

@@ -27,3 +27,9 @@ type UpdateResponse struct {
 	Message string
 	Title   string
 }
+
+type Field struct {
+	Name  string
+	Label string
+	Type  string
+}

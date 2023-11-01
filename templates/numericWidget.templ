@@ -22,7 +22,7 @@ templ NumericWidget(title string, value string, unit string, unitAfter bool, htm
 	</div>
 }
 
-templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models.FormCheckbox, button []*models.FormButton, widgetLayout *models.WidgetLayout, htmx *htmx.Htmx) {
+templ GenericForm(formTitle string, fields []templ.Component, widgetLayout *models.WidgetLayout, htmx *htmx.Htmx) {
 	<div class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }>
 		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
 		<div id="form-error"></div>
@@ -30,20 +30,19 @@ templ GenericForm(formTitle string, fields []templ.Component, checkbox []*models
 			for _, field := range fields {
 				{! field }
 			}
-			for _, chk := range checkbox {
-				@FormCheckbox(chk)
-			}
-			for _, btn := range button {
-				@FormButton(btn)
-			}
 		</form>
 	</div>
 }
 
-templ FormField(data *models.FormField) {
+templ FormField(data models.Field) {
 	<div class="mb-4">
-		<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
-		<input type={ data.FieldType } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+		if data.Type == "submit" {
+			<button type="submit" class={ "bg-green-500 text-white p-2 rounded-md" }>{ data.Label }</button>
+		} else {
+			<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
+			<input type={ data.Type } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+		}
+
 	</div>
 }
 

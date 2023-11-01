@@ -11,25 +11,19 @@ import (
 
 // Form is an interface that defines a structure for form-based components.
 // It provides methods to modify, display and handle form-related actions.
-type Form interface {
+type Form[F any] interface {
 	components.UIComponent
 
 	// setUpdateHandler sets a custom handler used to handle the form update request.
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
-	setUpdateHandler(handler func(c components.RequestWrapper) *models.UpdateResponse)
+	setUpdateHandler(handler func(c F) *models.UpdateResponse)
 
 	// setInitialValue sets the initial value for the form.
 	// It takes an UpdateResponse as its argument.
 	setInitialValue(value models.UpdateResponse)
 
 	// addFormFields allows adding multiple fields to the form.
-	addFormFields(field ...*models.FormField)
-
-	// addFormButtons allows adding multiple buttons to the form.
-	addFormButtons(button ...*models.FormButton)
-
-	// addFormCheckboxes allows adding multiple checkboxes to the form.
-	addFormCheckboxes(checkbox ...*models.FormCheckbox)
+	addFormFields(field ...models.Field)
 
 	// updateAction defines the update action for the form.
 	// Returns a template component for rendering.
@@ -37,15 +31,15 @@ type Form interface {
 
 	// WithSettings allows applying multiple settings to the form.
 	// Returns the modified form.
-	WithSettings(settings ...func(f Form)) Form
+	WithSettings(settings ...func(f Form[F])) Form[F]
 }
 
-type formImpl struct {
+type formImpl[F any] struct {
 	baseWidget    widgets.Widget
-	fields        []*models.FormField
+	fields        []models.Field
 	buttons       []*models.FormButton
 	checkboxes    []*models.FormCheckbox
-	updateHandler func(c components.RequestWrapper) *models.UpdateResponse
+	updateHandler func(c F) *models.UpdateResponse
 	initialValue  models.UpdateResponse
 	description   string
 	spec          *models.TreeSpec
@@ -54,15 +48,15 @@ type formImpl struct {
 	htmxOpts      htmx.HTMX
 }
 
-func newForm() *formImpl {
-	var w formImpl
+func newForm[F any]() *formImpl[F] {
+	var w formImpl[F]
 	w.baseWidget = widgets.NewWidget()
 	w.htmxOpts = htmx.NewEmpty()
 	return &w
 }
 
-func NewFormWidget(name string, setters ...func(n widgets.Widget)) Form {
-	widget := newForm()
+func NewFormWidget[F any](name string, setters ...func(n widgets.Widget)) Form[F] {
+	widget := newForm[F]()
 	widget.baseWidget.SetName(name)
 
 	for _, setter := range setters {
