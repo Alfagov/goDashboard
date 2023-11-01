@@ -148,7 +148,10 @@ func VisualizeTree(tree UIComponent) {
 		charts.WithTitleOpts(opts.Title{Title: "Tree-Visualize"}),
 	)
 
-	nodes := TreeSpecToChartNodes(tree.GetSpec())
+	nodes := TreeSpecToChartNodes(
+		[]*models.TreeSpec{
+			tree.GetSpec(),
+		})
 
 	treeChart.AddSeries("tree", nodes)
 
@@ -156,26 +159,25 @@ func VisualizeTree(tree UIComponent) {
 	treeChart.Render(f)
 }
 
-func TreeSpecToChartNodes(spec *models.TreeSpec) []opts.TreeData {
+func TreeSpecToChartNodes(spec []*models.TreeSpec) []opts.TreeData {
 	var nodes []opts.TreeData
-	for _, child := range spec.Children {
+
+	for _, child := range spec {
 		nodes = append(nodes, opts.TreeData{
 			Name:     child.Name,
-			Value:    1,
-			Children: treeSpecToChartNodes(child),
+			Children: treeSpecToChartNodes(child.Children),
 		})
 	}
 
 	return nodes
 }
 
-func treeSpecToChartNodes(spec *models.TreeSpec) []*opts.TreeData {
+func treeSpecToChartNodes(spec []*models.TreeSpec) []*opts.TreeData {
 	var nodes []*opts.TreeData
-	for _, child := range spec.Children {
+	for _, child := range spec {
 		nodes = append(nodes, &opts.TreeData{
 			Name:     child.Name,
-			Value:    1,
-			Children: treeSpecToChartNodes(child),
+			Children: treeSpecToChartNodes(child.Children),
 		})
 	}
 

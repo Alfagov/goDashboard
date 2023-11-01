@@ -42,7 +42,7 @@ func Aside(descriptor []*models.TreeSpec) templ.Component {
 			if err != nil {
 				return err
 			}
-			_, err = templBuffer.WriteString(templ.EscapeString(page.Route))
+			_, err = templBuffer.WriteString(templ.EscapeString("/" + page.Route))
 			if err != nil {
 				return err
 			}
