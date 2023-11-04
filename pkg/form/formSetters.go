@@ -4,12 +4,6 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 )
 
-func SetFormInitialValue[F any](value models.UpdateResponse) func(f Form[F]) {
-	return func(f Form[F]) {
-		f.setInitialValue(value)
-	}
-}
-
 func SetFormUpdateHandler[F any](handler func(c F) *models.UpdateResponse) func(
 	f Form[F],
 ) {
@@ -18,10 +12,18 @@ func SetFormUpdateHandler[F any](handler func(c F) *models.UpdateResponse) func(
 	}
 }
 
-func SetFormFields[F any](fields ...models.Field) func(
+func AddFormFields[F any](fields ...*models.Field) func(
 	f Form[F],
 ) {
 	return func(f Form[F]) {
 		f.addFormFields(fields...)
+	}
+}
+
+func WithSelectHandler[F any](fieldName string, handler func(string) []string) func(
+	f Form[F],
+) {
+	return func(f Form[F]) {
+		f.setSelectHandler(fieldName, handler)
 	}
 }

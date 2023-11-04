@@ -40,7 +40,7 @@ func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div></body>")
+		_, err = templBuffer.WriteString("</div><div id=\"alert-reference-element\"></div></body>")
 		if err != nil {
 			return err
 		}

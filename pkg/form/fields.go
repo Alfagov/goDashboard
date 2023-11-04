@@ -1,6 +1,34 @@
 package form
 
-import "github.com/Alfagov/goDashboard/models"
+import (
+	"github.com/Alfagov/goDashboard/models"
+)
+
+var FieldMap = map[string]func(name string, label string) models.Field{
+	"button":         ButtonField,
+	"checkbox":       CheckboxField,
+	"color":          ColorField,
+	"date":           DateField,
+	"datetime-local": DateTimeLocalField,
+	"email":          EmailField,
+	"file":           FileField,
+	"hidden":         HiddenField,
+	"image":          ImageField,
+	"month":          MonthField,
+	"number":         NumberField,
+	"password":       PasswordField,
+	"radio":          RadioField,
+	"range":          RangeField,
+	"reset":          ResetField,
+	"search":         SearchField,
+	"submit":         SubmitField,
+	"tel":            TelField,
+	"text":           TextField,
+	"time":           TimeField,
+	"url":            URLField,
+	"week":           WeekField,
+	"select":         SelectField,
+}
 
 var (
 	ButtonField = func(name string, label string) models.Field {
@@ -176,6 +204,15 @@ var (
 			Name:  name,
 			Label: label,
 			Type:  "week",
+		}
+	}
+
+	SelectField = func(name string, label string) models.Field {
+		return models.Field{
+			Name:  name,
+			Label: label,
+			Type:  "select",
+			Route: "",
 		}
 	}
 )

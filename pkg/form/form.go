@@ -2,11 +2,21 @@ package form
 
 import (
 	"github.com/Alfagov/goDashboard/htmx"
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
+	"github.com/go-playground/validator/v10"
 	"github.com/oklog/ulid/v2"
+	"go.uber.org/zap"
+)
+
+const (
+	ActionSelectFieldQuery = "action_select_field"
+	NameSelectFieldQuery   = "name_select_field"
+	LabelStructTag         = "label"
+	TypeStructTag          = "type"
 )
 
 // Form is an interface that defines a structure for form-based components.
@@ -18,12 +28,10 @@ type Form[F any] interface {
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
 	setUpdateHandler(handler func(c F) *models.UpdateResponse)
 
-	// setInitialValue sets the initial value for the form.
-	// It takes an UpdateResponse as its argument.
-	setInitialValue(value models.UpdateResponse)
-
 	// addFormFields allows adding multiple fields to the form.
-	addFormFields(field ...models.Field)
+	addFormFields(field ...*models.Field)
+
+	setSelectHandler(fieldName string, handler func(string) []string)
 
 	// updateAction defines the update action for the form.
 	// Returns a template component for rendering.
@@ -36,15 +44,14 @@ type Form[F any] interface {
 
 type formImpl[F any] struct {
 	baseWidget    widgets.Widget
-	fields        []models.Field
-	buttons       []*models.FormButton
-	checkboxes    []*models.FormCheckbox
+	validator     *validator.Validate
+	fields        []*models.Field
+	popUpResponse bool
 	updateHandler func(c F) *models.UpdateResponse
-	initialValue  models.UpdateResponse
 	description   string
 	spec          *models.TreeSpec
 	parent        components.UIComponent
-	popUpResponse bool
+	children      []components.UIComponent
 	htmxOpts      htmx.HTMX
 }
 
@@ -66,6 +73,12 @@ func NewFormWidget[F any](name string, setters ...func(n widgets.Widget)) Form[F
 	id := "formWidget_" + name + "_" + ulid.Make().String()
 	widget.baseWidget.SetId(id)
 	widget.htmxOpts.AppendToPath("widget", id)
+
+	err := widget.generate()
+	if err != nil {
+		logger.L.Error("error generating form", zap.Error(err))
+		return nil
+	}
 
 	return widget
 }
