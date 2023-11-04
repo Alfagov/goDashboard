@@ -28,6 +28,7 @@ var FieldMap = map[string]func(name string, label string) models.Field{
 	"url":            URLField,
 	"week":           WeekField,
 	"select":         SelectField,
+	"select-remote":  SelectRemoteField,
 }
 
 var (
@@ -212,6 +213,15 @@ var (
 			Name:  name,
 			Label: label,
 			Type:  "select",
+			Route: "",
+		}
+	}
+
+	SelectRemoteField = func(name string, label string) models.Field {
+		return models.Field{
+			Name:  name,
+			Label: label,
+			Type:  "select-remote",
 			Route: "",
 		}
 	}

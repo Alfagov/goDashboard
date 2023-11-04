@@ -36,24 +36,37 @@ templ GenericForm(formTitle string, fields []templ.Component, widgetLayout *mode
 
 templ FormField(data models.Field, baseRoute string) {
 
-<div class="mb-4">
 
 		switch data.Type {
 		case "submit":
-			<button type="submit" class={ "btn bg-green-500 text-white p-2 rounded-md" }>{ data.Label }</button>
+			<div class="mb-4 flex items-center justify-center">
+				<button type="submit" class={ "btn bg-green-500 text-white p-2 rounded-md" }>{ data.Label }</button>
+			</div>
 		case "select":
-			<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
-			<select class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" hx-trigger="load" hx-swap="innerHTML" hx-target="this" hx-get={ "/" + baseRoute + data.Route } id={ data.Name } name={ data.Name }>
+			<div class="mb-4">
+				<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<select class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" hx-trigger="load" hx-swap="innerHTML" hx-target="this" hx-get={ "/" + baseRoute + data.Route } id={ data.Name } name={ data.Name }>
 				<option value="">Loading...</option>
-			</select>
+				</select>
+			</div>
+	    case "select-remote":
+			<label class="block text-sm font-medium text-gray-600">{ data.Label }
+				<input class="mt-1 p-2 w-full border rounded-md" hx-trigger="keyup delay:500ms" hx-swap="innerHTML" hx-select={ "#"+data.Name+"options" } hx-target={ "#" + data.Name + "list" } hx-get={ "/" + baseRoute + data.Route } list={ data.Name + "list" } name={ data.Name } />
+			</label>
+			<datalist id={ data.Name + "list" }>
+			</datalist>
 		case "checkbox":
-			<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
-			<input type={ data.Type } id={ data.Name } name={ data.Name } value={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			<div class="mb-4 flex items-center">
+				<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<input type={ data.Type } id={ data.Name } name={ data.Name } value={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			</div>
 		default:
-			<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
-			<input type={ data.Type } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			<div class="mb-4">
+				<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<input type={ data.Type } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			</div>
+
 		}
-</div>
 }
 
 templ SelectFormField(label string, name string, options []string) {
@@ -67,10 +80,12 @@ templ SelectFormField(label string, name string, options []string) {
 	</div>
 }
 
-templ SelectOptions(options []string) {
-	for _, option := range options {
-		<option>{ option }</option>
-	}
+templ SelectOptions(options []string, id string) {
+	<div id={ id }>
+		for _, option := range options {
+			<option>{ option }</option>
+		}
+	</div>
 }
 
 templ FormButton(data *models.FormButton) {

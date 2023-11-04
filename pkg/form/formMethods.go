@@ -113,7 +113,19 @@ func (fw *formImpl[F]) Render(req components.RequestWrapper) *components.RenderR
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
 					return &components.RenderResponse{
-						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, ""))),
+						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
+							field.Name+"options"),
+					}
+				}
+			}
+		}
+
+		if req.Query(ActionSelectFieldQuery) == "select-remote" {
+			for _, field := range fw.fields {
+				if field.Name == req.Query(NameSelectFieldQuery) {
+					return &components.RenderResponse{
+						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
+							field.Name+"options"),
 					}
 				}
 			}
@@ -218,6 +230,10 @@ func toFieldArray(t reflect.Type) []*models.Field {
 		field := FieldMap[tp](name, label)
 		if tp == "select" {
 			field.Route = fmt.Sprintf("?%s=select&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
+		}
+
+		if tp == "select-remote" {
+			field.Route = fmt.Sprintf("?%s=select-remote&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
 		}
 
 		fields = append(fields, &field)
