@@ -58,7 +58,7 @@ func NewDashboard(name string, img string) Dashboard {
 	}
 }
 
-func init() {
+func InitDashboardGlobals() {
 	err := logger.InitLogger()
 	if err != nil {
 		panic(err)
