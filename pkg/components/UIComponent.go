@@ -61,6 +61,7 @@ type UIComponent interface {
 
 type RequestWrapper interface {
 	BindFormRequest(v interface{}) error
+	Query(key string, def ...string) string
 	Method() string
 }
 
@@ -74,6 +75,10 @@ func NewReqWrapper(c *fiber.Ctx) RequestWrapper {
 
 func (fr *requestWrapper) BindFormRequest(v interface{}) error {
 	return fr.c.BodyParser(v)
+}
+
+func (fr *requestWrapper) Query(key string, def ...string) string {
+	return fr.c.Query(key, def...)
 }
 
 func (fr *requestWrapper) Method() string {
