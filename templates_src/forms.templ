@@ -50,3 +50,11 @@ templ FormField(data models.Field, baseRoute string) {
 
 		}
 }
+
+templ SelectOptions(options []string, id string) {
+	<div id={ id }>
+		for _, option := range options {
+		<option>{ option }</option>
+		}
+	</div>
+}

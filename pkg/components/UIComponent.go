@@ -2,10 +2,12 @@ package components
 
 import (
 	"errors"
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -123,6 +125,8 @@ type RenderResponse struct {
 
 // NodeType is an interface that defines the behavior for node type classification.
 // It allows for type identification and comparison.
+//
+//goland:noinspection Annotator,Annotator
 type NodeType interface {
 	// SuperType returns the name of the super type of the current node type
 	SuperType() string
@@ -193,7 +197,10 @@ func VisualizeTree(tree UIComponent) {
 	treeChart.AddSeries("tree", nodes)
 
 	f, _ := os.Create("tree.html")
-	treeChart.Render(f)
+	err := treeChart.Render(f)
+	if err != nil {
+		logger.L.Error("error in rendering tree", zap.Error(err))
+	}
 }
 
 func TreeSpecToChartNodes(spec []*models.TreeSpec) []opts.TreeData {

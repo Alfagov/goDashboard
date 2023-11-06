@@ -2,9 +2,11 @@ package graphContainer
 
 import (
 	"errors"
+	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
+	"go.uber.org/zap"
 )
 
 // GraphWidget implementation
@@ -50,7 +52,11 @@ func (g *graphWidgetImpl) Name() string {
 func (g *graphWidgetImpl) UpdateSpec() *models.TreeSpec {
 	route := components.GetRouteFromParents(g)
 
-	g.htmxOpts.AddBeforePath(route)
+	err := g.htmxOpts.AddBeforePath(route)
+	if err != nil {
+		logger.L.Error("error in updating spec", zap.Error(err))
+	}
+
 	return &models.TreeSpec{
 		Name:        g.Name(),
 		ImageRoute:  "",

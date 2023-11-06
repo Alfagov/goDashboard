@@ -86,7 +86,7 @@ func Test_dashboard_AddChild(t *testing.T) {
 				Children: make(map[string]components.UIComponent),
 			},
 			args: args{
-				child: test.NewMockUIComponent("test", components.FormWidgetType),
+				child: test.NewMockUIComponent("test", components.FormWidgetType, nil),
 			},
 			wantErr:   true,
 			wantChild: 0,
@@ -94,10 +94,11 @@ func Test_dashboard_AddChild(t *testing.T) {
 		{
 			name: "test error for existing child",
 			fields: fields{
-				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test",
+					components.PageType, nil)},
 			},
 			args: args{
-				child: test.NewMockUIComponent("test", components.PageType),
+				child: test.NewMockUIComponent("test", components.PageType, nil),
 			},
 			wantErr:   true,
 			wantChild: 1,
@@ -108,7 +109,7 @@ func Test_dashboard_AddChild(t *testing.T) {
 				Children: make(map[string]components.UIComponent),
 			},
 			args: args{
-				child: test.NewMockUIComponent("test", components.PageType),
+				child: test.NewMockUIComponent("test", components.PageType, nil),
 			},
 			wantErr:   false,
 			wantChild: 1,
@@ -159,12 +160,13 @@ func Test_dashboard_FindChild(t *testing.T) {
 		{
 			name: "success finding child",
 			fields: fields{
-				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test",
+					components.PageType, nil)},
 			},
 			args: args{
 				name: "test",
 			},
-			want:      test.NewMockUIComponent("test", components.PageType),
+			want:      test.NewMockUIComponent("test", components.PageType, nil),
 			wantFound: true,
 		},
 		{
@@ -224,10 +226,11 @@ func Test_dashboard_KillChild(t *testing.T) {
 		{
 			name: "success killing child",
 			fields: fields{
-				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test",
+					components.PageType, nil)},
 			},
 			args: args{
-				child: test.NewMockUIComponent("test", components.PageType),
+				child: test.NewMockUIComponent("test", components.PageType, nil),
 			},
 			wantErr: false,
 			wantLen: 0,
@@ -238,7 +241,7 @@ func Test_dashboard_KillChild(t *testing.T) {
 				Children: map[string]components.UIComponent{},
 			},
 			args: args{
-				child: test.NewMockUIComponent("test", components.PageType),
+				child: test.NewMockUIComponent("test", components.PageType, nil),
 			},
 			wantErr: true,
 			wantLen: 0,
@@ -385,7 +388,8 @@ func Test_dashboard_UpdateSpec(t *testing.T) {
 				name:        "testName",
 				image:       "testImage",
 				description: "testDescription",
-				Children:    map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test",
+					components.PageType, nil)},
 			},
 			want: &models.TreeSpec{
 				Name:        "testName",
