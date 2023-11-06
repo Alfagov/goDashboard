@@ -58,7 +58,6 @@ func TestNewDashboard(t *testing.T) {
 	}
 }
 
-// TODO: finish tests
 func Test_dashboard_AddChild(t *testing.T) {
 	logger.L = zap.NewNop()
 	type fields struct {
@@ -75,10 +74,11 @@ func Test_dashboard_AddChild(t *testing.T) {
 		child components.UIComponent
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
+		name      string
+		fields    fields
+		args      args
+		wantErr   bool
+		wantChild int
 	}{
 		{
 			name: "test wrong child type",
@@ -88,17 +88,19 @@ func Test_dashboard_AddChild(t *testing.T) {
 			args: args{
 				child: test.NewMockUIComponent("test", components.FormWidgetType),
 			},
-			wantErr: true,
+			wantErr:   true,
+			wantChild: 0,
 		},
 		{
-			name: "test for existing child",
+			name: "test error for existing child",
 			fields: fields{
 				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
 			},
 			args: args{
 				child: test.NewMockUIComponent("test", components.PageType),
 			},
-			wantErr: true,
+			wantErr:   true,
+			wantChild: 1,
 		},
 		{
 			name: "test success add child",
@@ -108,7 +110,8 @@ func Test_dashboard_AddChild(t *testing.T) {
 			args: args{
 				child: test.NewMockUIComponent("test", components.PageType),
 			},
-			wantErr: false,
+			wantErr:   false,
+			wantChild: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -126,74 +129,8 @@ func Test_dashboard_AddChild(t *testing.T) {
 			if err := d.AddChild(tt.args.child); (err != nil) != tt.wantErr {
 				t.Errorf("AddChild() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-}
 
-func Test_dashboard_CreateRoutes(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			d.CreateRoutes()
-		})
-	}
-}
-
-func Test_dashboard_CreateStaticRoutes(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			d.CreateStaticRoutes()
+			assert.Len(t, d.GetChildren(), tt.wantChild)
 		})
 	}
 }
@@ -213,13 +150,34 @@ func Test_dashboard_FindChild(t *testing.T) {
 		name string
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   components.UIComponent
-		want1  bool
+		name      string
+		fields    fields
+		args      args
+		want      components.UIComponent
+		wantFound bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "success finding child",
+			fields: fields{
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+			},
+			args: args{
+				name: "test",
+			},
+			want:      test.NewMockUIComponent("test", components.PageType),
+			wantFound: true,
+		},
+		{
+			name: "failure finding child",
+			fields: fields{
+				Children: map[string]components.UIComponent{},
+			},
+			args: args{
+				name: "test",
+			},
+			want:      nil,
+			wantFound: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -233,254 +191,11 @@ func Test_dashboard_FindChild(t *testing.T) {
 				IndexPage:   tt.fields.IndexPage,
 				Children:    tt.fields.Children,
 			}
-			got, got1 := d.FindChild(tt.args.name)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindChild() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("FindChild() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
-}
 
-func Test_dashboard_FindChildById(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	type args struct {
-		id string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   components.UIComponent
-		want1  bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			got, got1 := d.FindChildById(tt.args.id)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindChildById() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("FindChildById() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
-}
+			got, found := d.FindChild(tt.args.name)
 
-func Test_dashboard_FindChildByType(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	type args struct {
-		name          string
-		componentType string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   components.UIComponent
-		want1  bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			got, got1 := d.FindChildByType(tt.args.name, tt.args.componentType)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindChildByType() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("FindChildByType() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
-}
-
-func Test_dashboard_GetChildren(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   []components.UIComponent
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.GetChildren(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetChildren() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dashboard_GetParent(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   components.UIComponent
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.GetParent(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetParent() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dashboard_GetSpec(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   *models.TreeSpec
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.GetSpec(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetSpec() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dashboard_Id(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.Id(); got != tt.want {
-				t.Errorf("Id() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.wantFound, found)
 		})
 	}
 }
@@ -504,8 +219,30 @@ func Test_dashboard_KillChild(t *testing.T) {
 		fields  fields
 		args    args
 		wantErr bool
+		wantLen int
 	}{
-		// TODO: Add test cases.
+		{
+			name: "success killing child",
+			fields: fields{
+				Children: map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+			},
+			args: args{
+				child: test.NewMockUIComponent("test", components.PageType),
+			},
+			wantErr: false,
+			wantLen: 0,
+		},
+		{
+			name: "failure killing child",
+			fields: fields{
+				Children: map[string]components.UIComponent{},
+			},
+			args: args{
+				child: test.NewMockUIComponent("test", components.PageType),
+			},
+			wantErr: true,
+			wantLen: 0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -519,91 +256,21 @@ func Test_dashboard_KillChild(t *testing.T) {
 				IndexPage:   tt.fields.IndexPage,
 				Children:    tt.fields.Children,
 			}
-			if err := d.KillChild(tt.args.child); (err != nil) != tt.wantErr {
-				t.Errorf("KillChild() error = %v, wantErr %v", err, tt.wantErr)
+
+			err := d.KillChild(tt.args.child)
+
+			if tt.wantErr {
+				assert.NotNil(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
+
+			assert.Len(t, d.GetChildren(), tt.wantLen)
 		})
 	}
 }
 
-func Test_dashboard_Name(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.Name(); got != tt.want {
-				t.Errorf("Name() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dashboard_Render(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	type args struct {
-		in0 components.RequestWrapper
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *components.RenderResponse
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.Render(tt.args.in0); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Render() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
+// TODO: FINISH ME
 func Test_dashboard_Run(t *testing.T) {
 	type fields struct {
 		id          string
@@ -641,44 +308,6 @@ func Test_dashboard_Run(t *testing.T) {
 	}
 }
 
-func Test_dashboard_SetParent(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	type args struct {
-		in0 components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			d.SetParent(tt.args.in0)
-		})
-	}
-}
-
 func Test_dashboard_Type(t *testing.T) {
 	type fields struct {
 		id          string
@@ -695,7 +324,11 @@ func Test_dashboard_Type(t *testing.T) {
 		fields fields
 		want   components.NodeType
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "test dashboard type",
+			fields: fields{},
+			want:   components.DashboardType,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -709,9 +342,7 @@ func Test_dashboard_Type(t *testing.T) {
 				IndexPage:   tt.fields.IndexPage,
 				Children:    tt.fields.Children,
 			}
-			if got := d.Type(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Type() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, d.Type())
 		})
 	}
 }
@@ -732,7 +363,38 @@ func Test_dashboard_UpdateSpec(t *testing.T) {
 		fields fields
 		want   *models.TreeSpec
 	}{
-		// TODO: Add test cases.
+		{
+			name: "test update spec",
+			fields: fields{
+				name:        "testName",
+				image:       "testImage",
+				description: "testDescription",
+				Children:    map[string]components.UIComponent{},
+			},
+			want: &models.TreeSpec{
+				Name:        "testName",
+				ImageRoute:  "testImage",
+				Description: "testDescription",
+				Route:       "testName",
+				Children:    nil,
+			},
+		},
+		{
+			name: "test update spec",
+			fields: fields{
+				name:        "testName",
+				image:       "testImage",
+				description: "testDescription",
+				Children:    map[string]components.UIComponent{"test": test.NewMockUIComponent("test", components.PageType)},
+			},
+			want: &models.TreeSpec{
+				Name:        "testName",
+				ImageRoute:  "testImage",
+				Description: "testDescription",
+				Route:       "testName",
+				Children:    []*models.TreeSpec{{Name: "test"}},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -748,47 +410,6 @@ func Test_dashboard_UpdateSpec(t *testing.T) {
 			}
 			if got := d.UpdateSpec(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("UpdateSpec() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_dashboard_WithPages(t *testing.T) {
-	type fields struct {
-		id          string
-		name        string
-		image       string
-		description string
-		Router      *fiber.App
-		treeSpec    *models.TreeSpec
-		IndexPage   func(body templ.Component) templ.Component
-		Children    map[string]components.UIComponent
-	}
-	type args struct {
-		pages []components.UIComponent
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   Dashboard
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := &dashboard{
-				id:          tt.fields.id,
-				name:        tt.fields.name,
-				image:       tt.fields.image,
-				description: tt.fields.description,
-				Router:      tt.fields.Router,
-				treeSpec:    tt.fields.treeSpec,
-				IndexPage:   tt.fields.IndexPage,
-				Children:    tt.fields.Children,
-			}
-			if got := d.WithPages(tt.args.pages...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithPages() = %v, want %v", got, tt.want)
 			}
 		})
 	}

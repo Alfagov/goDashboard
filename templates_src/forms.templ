@@ -1,0 +1,52 @@
+package templates
+
+import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/htmx"
+import "github.com/Alfagov/goDashboard/layout"
+
+templ GenericForm(formTitle string, fields []templ.Component, widgetLayout *layout.WidgetLayout, htmx *htmx.Htmx) {
+	<div class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }>
+		<h2 class="text-2xl font-bold mb-4">{ formTitle }</h2>
+		<div id="form-error"></div>
+		<form hx-post={ "/" + htmx.Route.String() } hx-swap="afterbegin" hx-target="#alert-reference-element">
+			for _, field := range fields {
+				{! field }
+			}
+		</form>
+	</div>
+}
+
+templ FormField(data models.Field, baseRoute string) {
+
+
+		switch data.Type {
+		case "submit":
+			<div class="mb-4 flex items-center justify-center">
+				<button type="submit" class={ "btn bg-green-500 text-white p-2 rounded-md" }>{ data.Label }</button>
+			</div>
+		case "select":
+			<div class="mb-4">
+				<label for={ data.Name } class="block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<select class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" hx-trigger="load" hx-swap="innerHTML" hx-target="this" hx-get={ "/" + baseRoute + data.Route } id={ data.Name } name={ data.Name }>
+				<option value="">Loading...</option>
+				</select>
+			</div>
+	    case "select-remote":
+			<label class="block text-sm font-medium text-gray-600">{ data.Label }
+				<input class="mt-1 p-2 w-full border rounded-md" hx-trigger="keyup delay:500ms" hx-swap="innerHTML" hx-select={ "#"+data.Name+"options" } hx-target={ "#" + data.Name + "list" } hx-get={ "/" + baseRoute + data.Route } list={ data.Name + "list" } name={ data.Name } />
+			</label>
+			<datalist id={ data.Name + "list" }>
+			</datalist>
+		case "checkbox":
+			<div class="mb-4 flex items-center">
+				<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<input type={ data.Type } id={ data.Name } name={ data.Name } value={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			</div>
+		default:
+			<div class="mb-4">
+				<label for={ data.Name } class=" block text-sm font-medium text-gray-600">{ data.Label }</label>
+				<input type={ data.Type } id={ data.Name } name={ data.Name } class="mt-1 p-2 w-full border rounded-md"/>
+			</div>
+
+		}
+}

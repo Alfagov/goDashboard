@@ -19,15 +19,3 @@ type LineYAxis struct {
 	Name string
 	Data interface{}
 }
-
-type WaterfallGraphData struct {
-	XAxis interface{}
-	YAxis WaterfallYAxis
-}
-
-type WaterfallYAxis struct {
-	Name    string
-	PosName string
-	NegName string
-	Data    []int
-}

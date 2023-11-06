@@ -20,13 +20,13 @@ func (fw *formImpl[F]) addFormFields(field ...*models.Field) {
 }
 
 func (fw *formImpl[F]) setUpdateHandler(
-	handler func(c F) *models.UpdateResponse,
+	handler func(c F) *UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
 }
 
-func (fw *formImpl[F]) updateAction(data *models.UpdateResponse) templ.Component {
+func (fw *formImpl[F]) updateAction(data *UpdateResponse) templ.Component {
 
 	if !data.Success {
 		element := templates.ErrorAlert(data.Title, data.Message)
@@ -49,7 +49,7 @@ func (fw *formImpl[F]) WithSettings(
 	return fw
 }
 
-func (fw *formImpl[F]) process(req components.RequestWrapper) (*F, error) {
+func (fw *formImpl[F]) process(req models.RequestWrapper) (*F, error) {
 
 	var data F
 	if req != nil {
@@ -92,7 +92,7 @@ func (fw *formImpl[F]) setSelectHandler(fieldName string, handler func(string) [
 
 // UIComponent interface implementation
 
-func (fw *formImpl[F]) Render(req components.RequestWrapper) *components.RenderResponse {
+func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderResponse {
 
 	if req != nil {
 		if req.Method() == http.MethodPost {

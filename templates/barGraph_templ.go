@@ -9,11 +9,10 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/Alfagov/goDashboard/models"
 import "github.com/Alfagov/goDashboard/htmx"
 import "github.com/Alfagov/goDashboard/layout"
 
-func BarGraphWidget(widgetLayout *models.WidgetLayout, graph templ.Component) templ.Component {
+func BarGraphWidget(widgetLayout *layout.WidgetLayout, graph templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -58,7 +57,7 @@ func BarGraphWidget(widgetLayout *models.WidgetLayout, graph templ.Component) te
 	})
 }
 
-func GeneralGraph(id string, graph templ.Component, widgetLayout *models.WidgetLayout, htmx *htmx.Htmx) templ.Component {
+func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetLayout, htmx *htmx.Htmx) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {

@@ -1,8 +1,14 @@
 package form
 
-import (
-	"github.com/Alfagov/goDashboard/models"
-)
+import "github.com/Alfagov/goDashboard/models"
+
+// UpdateResponse represents the outcome of an update operation, including a success flag, a message explaining the result,
+// and a title for the response, which could be used for display in UI notifications or logs.
+type UpdateResponse struct {
+	Success bool
+	Message string
+	Title   string
+}
 
 var FieldMap = map[string]func(name string, label string) models.Field{
 	"button":         ButtonField,

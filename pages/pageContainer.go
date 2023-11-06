@@ -8,33 +8,63 @@ import (
 	"go.uber.org/zap"
 )
 
-// PageContainer is a container for pages
+// pageContainer is a private struct that serves as a container for UI components
+// that represent a container of pages.
 type pageContainer struct {
-	id          string
-	name        string
-	imagePath   string
+	// id is the unique identifier for the page container.
+	id string
+	// name is the display name of the page container.
+	name string
+	// imagePath is the file path to the image associated with the page container.
+	imagePath string
+	// description provides a brief summary of the page container's content.
 	description string
-	indexPage   string
+	// indexPage specifies the entry page's identifier within the container.
+	indexPage string
 
-	spec     *models.TreeSpec
-	parent   components.UIComponent
+	// spec holds the tree specification for the structure of the pages.
+	spec *models.TreeSpec
+	// parent is the UIComponent that acts as a parent to this container.
+	parent components.UIComponent
+	// children is a map of UIComponent children keyed by their string identifiers.
 	children map[string]components.UIComponent
 }
 
+// PageContainer defines the interface for a container that groups together
+// UI components representing pages, providing mechanisms to manage and retrieve
+// these pages within a user interface.
 type PageContainer interface {
+	// UIComponent is a set of common methods for User Interface components.
 	components.UIComponent
+
+	// setImagePath sets the file path to the image associated with the page container.
 	setImagePath(path string)
+
+	// GetIndexPage retrieves the identifier of the entry page in the page container.
 	GetIndexPage() string
+
+	// SetIndexPage sets the identifier of the entry page in the page container.
 	SetIndexPage(indexPage string)
+
+	// GetImagePath retrieves the file path to the image associated with the page container.
 	GetImagePath() string
+
+	// WithPages adds the given UIComponent pages to the page container and returns
+	// the PageContainer instance for method chaining.
 	WithPages(pages ...components.UIComponent) PageContainer
 }
 
-func NewPageContainer(
-	name string, setters ...func(
-		pc PageContainer,
-	),
-) PageContainer {
+// NewPageContainer creates and initializes a new PageContainer with the specified name.
+// It applies a list of setter functions to configure the PageContainer.
+// By default, the imagePath is set to a default location under "/static/img/"
+// with the image name derived from the specified name parameter.
+//
+// Parameters:
+// name: The name is used to identify the page container and to construct the default imagePath.
+// setters: A variadic list of setter functions that apply additional configurations to the page container.
+//
+// Returns a pointer to the newly created page container with the applied settings.
+func NewPageContainer(name string, setters ...func(pc PageContainer)) PageContainer {
 	var pc pageContainer
 	pc.name = name
 	pc.imagePath = "/static/img/" + name + ".png"
@@ -75,7 +105,7 @@ func (pc *pageContainer) GetSpec() *models.TreeSpec {
 	return pc.spec
 }
 
-func (pc *pageContainer) Render(components.RequestWrapper) *components.RenderResponse {
+func (pc *pageContainer) Render(models.RequestWrapper) *components.RenderResponse {
 	return &components.RenderResponse{
 		Component: templates.PageContainer(pc.children[pc.indexPage].Render(nil).Component, pc.spec.Children),
 	}
@@ -168,27 +198,33 @@ func (pc *pageContainer) KillChild(child components.UIComponent) error {
 	return nil
 }
 
-// PageContainer interface implementation
-
+// setImagePath sets the image path for the page container.
+// This method is unexported and intended for internal use within the package.
 func (pc *pageContainer) setImagePath(path string) {
 	pc.imagePath = path
 }
 
+// GetImagePath retrieves the image path of the page container.
 func (pc *pageContainer) GetImagePath() string {
 	return pc.imagePath
 }
 
+// SetIndexPage defines the index page for the page container.
 func (pc *pageContainer) SetIndexPage(indexPage string) {
 	pc.indexPage = indexPage
 }
 
+// GetIndexPage retrieves the identifier of the index page of the page container.
 func (pc *pageContainer) GetIndexPage() string {
 	return pc.indexPage
 }
 
+// WithPages adds multiple UIComponent pages to the page container.
+// This method can be used to chain the addition of pages to the container.
 func (pc *pageContainer) WithPages(pages ...components.UIComponent) PageContainer {
 	for _, pg := range pages {
-		pc.AddChild(pg)
+		err := pc.AddChild(pg)
+		logger.L.Error("error adding page to page container", zap.Error(err))
 	}
 
 	return pc
@@ -196,14 +232,18 @@ func (pc *pageContainer) WithPages(pages ...components.UIComponent) PageContaine
 
 // Setters
 
+// SetIndexPage returns a function that sets the index page of the page container.
+// This can be used as an argument to functions that accept a configuration function for PageContainer.
 func SetIndexPage(indexPage string) func(p PageContainer) {
 	return func(p PageContainer) {
 		p.SetIndexPage(indexPage)
 	}
 }
 
+// SetContainerImagePath returns a function that sets the image path for the page container.
+// This can be used as an argument to functions that accept a configuration function for PageContainer.
 func SetContainerImagePath(path string) func(p PageContainer) {
 	return func(p PageContainer) {
-		p.setImagePath(path)
+		p.setImagePath(path) // Note: This assumes the setImagePath method is exported or adjusted accordingly.
 	}
 }

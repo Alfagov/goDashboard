@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/templates"
 	"github.com/gofiber/fiber/v2"
@@ -26,7 +27,7 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		responseTemplate := widget.Render(components.NewReqWrapper(c))
+		responseTemplate := widget.Render(models.NewReqWrapper(c))
 
 		if responseTemplate.Json != nil {
 			return c.JSON(responseTemplate.Json)
@@ -52,7 +53,7 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		responseTemplate := widget.Render(components.NewReqWrapper(c))
+		responseTemplate := widget.Render(models.NewReqWrapper(c))
 
 		if responseTemplate.Json != nil {
 			return c.JSON(responseTemplate.Json)
@@ -72,7 +73,7 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		responseTemplate := widget.Render(components.NewReqWrapper(c))
+		responseTemplate := widget.Render(models.NewReqWrapper(c))
 
 		return c.Render("", responseTemplate.Component)
 	})
@@ -88,7 +89,7 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		responseTemplate := templates.PageContainer(page.Render(components.NewReqWrapper(c)).Component,
+		responseTemplate := templates.PageContainer(page.Render(models.NewReqWrapper(c)).Component,
 			container.GetSpec().Children)
 
 		responseTemplate = templates.IndexPage(d.name, d.image, d.GetSpec().Children, responseTemplate)

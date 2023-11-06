@@ -1,10 +1,8 @@
 package form
 
-import (
-	"github.com/Alfagov/goDashboard/models"
-)
+import "github.com/Alfagov/goDashboard/models"
 
-func SetFormUpdateHandler[F any](handler func(c F) *models.UpdateResponse) func(
+func SetFormUpdateHandler[F any](handler func(c F) *UpdateResponse) func(
 	f Form[F],
 ) {
 	return func(f Form[F]) {

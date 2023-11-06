@@ -11,11 +11,11 @@ type MockUIComponent struct {
 	componentType components.NodeType
 }
 
-func NewMockUIComponent(name string, componentType components.NodeType) MockUIComponent {
-	return MockUIComponent{name: name, componentType: componentType}
+func NewMockUIComponent(name string, componentType components.NodeType, parent components.UIComponent) MockUIComponent {
+	return MockUIComponent{name: name, componentType: componentType, parent: parent}
 }
 
-func (m MockUIComponent) Render(req components.RequestWrapper) *components.RenderResponse {
+func (m MockUIComponent) Render(req models.RequestWrapper) *components.RenderResponse {
 	//TODO implement me
 	panic("implement me")
 }
@@ -29,8 +29,9 @@ func (m MockUIComponent) Name() string {
 }
 
 func (m MockUIComponent) UpdateSpec() *models.TreeSpec {
-	//TODO implement me
-	panic("implement me")
+	return &models.TreeSpec{
+		Name: m.name,
+	}
 }
 
 func (m MockUIComponent) GetSpec() *models.TreeSpec {
@@ -54,8 +55,7 @@ func (m MockUIComponent) FindChildByType(name string, componentType string) (com
 }
 
 func (m MockUIComponent) GetParent() components.UIComponent {
-	//TODO implement me
-	panic("implement me")
+	return m.parent
 }
 
 func (m MockUIComponent) Id() string {

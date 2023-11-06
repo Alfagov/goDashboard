@@ -26,7 +26,7 @@ type Form[F any] interface {
 
 	// setUpdateHandler sets a custom handler used to handle the form update request.
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
-	setUpdateHandler(handler func(c F) *models.UpdateResponse)
+	setUpdateHandler(handler func(c F) *UpdateResponse)
 
 	// addFormFields allows adding multiple fields to the form.
 	addFormFields(field ...*models.Field)
@@ -35,7 +35,7 @@ type Form[F any] interface {
 
 	// updateAction defines the update action for the form.
 	// Returns a template component for rendering.
-	updateAction(data *models.UpdateResponse) templ.Component
+	updateAction(data *UpdateResponse) templ.Component
 
 	// WithSettings allows applying multiple settings to the form.
 	// Returns the modified form.
@@ -47,7 +47,7 @@ type formImpl[F any] struct {
 	validator     *validator.Validate
 	fields        []*models.Field
 	popUpResponse bool
-	updateHandler func(c F) *models.UpdateResponse
+	updateHandler func(c F) *UpdateResponse
 	description   string
 	spec          *models.TreeSpec
 	parent        components.UIComponent

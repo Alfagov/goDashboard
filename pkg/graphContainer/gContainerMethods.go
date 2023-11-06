@@ -22,7 +22,7 @@ func (g *graphWidgetImpl) WithSettings(settings ...func(gw GraphWidget)) GraphWi
 
 // UIComponent implementation
 
-func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+func (g *graphWidgetImpl) Render(req models.RequestWrapper) *components.RenderResponse {
 	if req != nil {
 		return &components.RenderResponse{
 			Json: g.update(),
