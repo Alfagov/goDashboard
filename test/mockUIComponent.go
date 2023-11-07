@@ -77,7 +77,7 @@ func (m MockUIComponent) AddChild(child components.UIComponent) error {
 	panic("implement me")
 }
 
-func (m MockUIComponent) KillChild(child components.UIComponent) error {
+func (m MockUIComponent) RemoveChild(child components.UIComponent) error {
 	//TODO implement me
 	panic("implement me")
 }

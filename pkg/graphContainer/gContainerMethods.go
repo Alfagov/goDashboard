@@ -102,6 +102,6 @@ func (g *graphWidgetImpl) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (g *graphWidgetImpl) KillChild(components.UIComponent) error {
+func (g *graphWidgetImpl) RemoveChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }

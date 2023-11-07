@@ -132,7 +132,7 @@ func (d *dashboard) AddChild(child components.UIComponent) error {
 	return nil
 }
 
-func (d *dashboard) KillChild(child components.UIComponent) error {
+func (d *dashboard) RemoveChild(child components.UIComponent) error {
 	_, exists := d.Children[child.Name()]
 	if !exists {
 		return components.ErrChildNotFound(child.Name())

@@ -197,7 +197,7 @@ func (p *page) AddChild(child components.UIComponent) error {
 	return nil
 }
 
-func (p *page) KillChild(child components.UIComponent) error {
+func (p *page) RemoveChild(child components.UIComponent) error {
 	_, exists := p.FindChild(child.Name())
 	if !exists {
 		return components.ErrChildNotFound(child.Name())

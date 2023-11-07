@@ -113,7 +113,7 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
 					return &components.RenderResponse{
-						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
+						Component: SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
 							field.Name+"options"),
 					}
 				}
@@ -124,7 +124,7 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
 					return &components.RenderResponse{
-						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
+						Component: SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
 							field.Name+"options"),
 					}
 				}
@@ -134,11 +134,11 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 
 	var fieldsComponent []templ.Component
 	for _, field := range fw.fields {
-		fieldsComponent = append(fieldsComponent, templates.FormField(*field, fw.spec.Route))
+		fieldsComponent = append(fieldsComponent, FormField(*field, fw.spec.Route))
 	}
 
 	return &components.RenderResponse{
-		Component: templates.GenericForm(
+		Component: GenericForm(
 			fw.Name(),
 			fieldsComponent,
 			fw.baseWidget.GetLayout(),
@@ -212,7 +212,7 @@ func (fw *formImpl[F]) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (fw *formImpl[F]) KillChild(components.UIComponent) error {
+func (fw *formImpl[F]) RemoveChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 

@@ -260,7 +260,7 @@ func Test_dashboard_KillChild(t *testing.T) {
 				Children:    tt.fields.Children,
 			}
 
-			err := d.KillChild(tt.args.child)
+			err := d.RemoveChild(tt.args.child)
 
 			if tt.wantErr {
 				assert.NotNil(t, err)

@@ -92,10 +92,10 @@ type UIComponent interface {
 	// potentially returning an error if the addition is not possible.
 	AddChild(child UIComponent) error
 
-	// KillChild removes a child UIComponent from this component's children.
+	// RemoveChild removes a child UIComponent from this component's children.
 	// This method is named whimsically and the action should be taken seriously
 	// as it alters the component tree.
-	KillChild(child UIComponent) error
+	RemoveChild(child UIComponent) error
 }
 
 // GetRouteFromParents constructs a string that represents the hierarchical path of a UI component by concatenating the names
@@ -126,7 +126,7 @@ type RenderResponse struct {
 // NodeType is an interface that defines the behavior for node type classification.
 // It allows for type identification and comparison.
 //
-//goland:noinspection Annotator,Annotator
+//goland:noinspection Annotator
 type NodeType interface {
 	// SuperType returns the name of the super type of the current node type
 	SuperType() string

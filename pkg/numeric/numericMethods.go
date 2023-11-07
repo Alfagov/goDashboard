@@ -149,6 +149,6 @@ func (n *numeric) AddChild(components.UIComponent) error {
 	return components.ErrCannotHaveChildren(n.Type().TypeName())
 }
 
-func (n *numeric) KillChild(components.UIComponent) error {
+func (n *numeric) RemoveChild(components.UIComponent) error {
 	return components.ErrCannotHaveChildren(n.Type().TypeName())
 }
