@@ -1,6 +1,8 @@
 package models
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 // NewReqWrapper creates a new RequestWrapper that wraps the Fiber context for handling HTTP requests.
 func NewReqWrapper(c *fiber.Ctx) RequestWrapper {
@@ -22,6 +24,16 @@ func (fr *requestWrapper) Method() string {
 	return fr.c.Method()
 }
 
+// Locals return the value of a local variable stored in the request context.
+func (fr *requestWrapper) Locals(key string) interface{} {
+	return fr.c.Locals(key)
+}
+
+// NewRequestWrapper creates a new RequestWrapper that wraps the Fiber context for handling HTTP requests.
+func NewRequestWrapper(c *fiber.Ctx) RequestWrapper {
+	return &requestWrapper{c: c}
+}
+
 // requestWrapper is an internal implementation that wraps a Fiber context to adhere to the RequestWrapper interface.
 type requestWrapper struct {
 	c *fiber.Ctx
@@ -37,6 +49,9 @@ type RequestWrapper interface {
 
 	// Method returns the HTTP method of the request.
 	Method() string
+
+	// Locals return the value of a local variable stored in the request context.
+	Locals(key string) interface{}
 }
 
 // Field defines a structure for form fields, including their name, label, type, and the route where the field is to be used.

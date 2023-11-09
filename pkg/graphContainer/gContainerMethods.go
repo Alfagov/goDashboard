@@ -5,7 +5,6 @@ import (
 	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"go.uber.org/zap"
 )
 
@@ -32,7 +31,7 @@ func (g *graphWidgetImpl) Render(req models.RequestWrapper) *components.RenderRe
 	}
 
 	return &components.RenderResponse{
-		Component: templates.GeneralGraph(
+		Component: GeneralGraph(
 			g.baseWidget.GetId(),
 			g.graph.Encode(g.baseWidget.GetLayout().Height),
 			g.baseWidget.GetLayout(),

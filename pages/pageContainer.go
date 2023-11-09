@@ -4,7 +4,6 @@ import (
 	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"go.uber.org/zap"
 )
 
@@ -105,9 +104,20 @@ func (pc *pageContainer) GetSpec() *models.TreeSpec {
 	return pc.spec
 }
 
-func (pc *pageContainer) Render(models.RequestWrapper) *components.RenderResponse {
+func (pc *pageContainer) Render(req models.RequestWrapper) *components.RenderResponse {
+
+	pageName := req.Locals("pageName")
+	if pageName != nil {
+		p, ok := pc.FindChildByType(pageName.(string), "page")
+		if ok {
+			return &components.RenderResponse{
+				Component: PageContainerView(p.Render(nil).Component, pc.spec.Children),
+			}
+		}
+	}
+
 	return &components.RenderResponse{
-		Component: templates.PageContainer(pc.children[pc.indexPage].Render(nil).Component, pc.spec.Children),
+		Component: PageContainerView(pc.children[pc.indexPage].Render(nil).Component, pc.spec.Children),
 	}
 }
 

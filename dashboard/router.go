@@ -3,7 +3,6 @@ package dashboard
 import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"github.com/gofiber/fiber/v2"
 	"os"
 	"strings"
@@ -84,15 +83,10 @@ func (d *dashboard) CreateRoutes() {
 			return c.SendStatus(404)
 		}
 
-		page, ok := container.FindChildByType(c.Params("page"), "page")
-		if !ok {
-			return c.SendStatus(404)
-		}
+		c.Locals("pageName", c.Params("page"))
 
-		responseTemplate := templates.PageContainer(page.Render(models.NewReqWrapper(c)).Component,
-			container.GetSpec().Children)
-
-		responseTemplate = templates.IndexPage(d.name, d.image, d.GetSpec().Children, responseTemplate)
+		responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children,
+			container.Render(models.NewReqWrapper(c)).Component)
 
 		c.Set("HX-Push-Url", c.Path())
 
@@ -106,7 +100,7 @@ func (d *dashboard) CreateRoutes() {
 		}
 
 		if page.Type().SuperType() == components.PageType.SuperType() {
-			responseTemplate := templates.IndexPage(d.name, d.image, d.GetSpec().Children, page.Render(nil).Component)
+			responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, page.Render(nil).Component)
 			c.Set("HX-Push-Url", c.Path())
 			return c.Render("", responseTemplate)
 		}
@@ -115,7 +109,7 @@ func (d *dashboard) CreateRoutes() {
 	})
 
 	d.Router.Get("/", func(c *fiber.Ctx) error {
-		responseTemplate := templates.IndexPage(d.name, d.image, d.GetSpec().Children, d.Render(nil).Component)
+		responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, d.Render(nil).Component)
 		c.Set("HX-Push-Url", c.Path())
 		return c.Render("", responseTemplate)
 	})

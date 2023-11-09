@@ -6,7 +6,6 @@ import (
 	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"go.uber.org/zap"
 )
 
@@ -53,7 +52,7 @@ func (d *dashboard) WithPages(pages ...components.UIComponent) Dashboard {
 
 func (d *dashboard) Render(models.RequestWrapper) *components.RenderResponse {
 	return &components.RenderResponse{
-		Component: templates.ListGridPage(d.treeSpec.Children),
+		Component: ListGridPage(d.treeSpec.Children),
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"github.com/Alfagov/goDashboard/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"go.uber.org/zap"
 	"strconv"
 )
@@ -67,7 +66,7 @@ func (n *numeric) Render(req models.RequestWrapper) *components.RenderResponse {
 		}
 
 		return &components.RenderResponse{
-			Component: templates.NumericWidget(
+			Component: NumericWidget(
 				n.baseWidget.GetName(),
 				strconv.Itoa(value),
 				n.unit,
@@ -78,7 +77,7 @@ func (n *numeric) Render(req models.RequestWrapper) *components.RenderResponse {
 	}
 
 	return &components.RenderResponse{
-		Component: templates.NumericWidget(
+		Component: NumericWidget(
 			n.baseWidget.GetName(),
 			strconv.Itoa(n.initialValue),
 			n.unit,

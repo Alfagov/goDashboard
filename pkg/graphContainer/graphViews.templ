@@ -1,14 +1,7 @@
-package templates
+package graphContainer
 
 import "github.com/Alfagov/goDashboard/htmx"
 import "github.com/Alfagov/goDashboard/layout"
-
-templ BarGraphWidget(widgetLayout *layout.WidgetLayout, graph templ.Component) {
-	<div
- 		class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }>
-		{! graph }
-	</div>
-}
 
 templ GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetLayout, htmx *htmx.Htmx) {
 	<div hx-ext="echarts" class={layout.ToCSS(widgetLayout) + "mt-30px items-center justify-center bg-white p-4 rounded-lg shadow-lg"}>
