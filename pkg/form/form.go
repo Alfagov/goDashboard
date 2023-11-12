@@ -1,8 +1,8 @@
 package form
 
 import (
-	"github.com/Alfagov/goDashboard/htmx"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/htmx"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
@@ -31,6 +31,7 @@ type Form[F any] interface {
 	// addFormFields allows adding multiple fields to the form.
 	addFormFields(field ...*models.Field)
 
+	// setSelectHandler sets the select handler for the field with fieldName
 	setSelectHandler(fieldName string, handler func(string) []string)
 
 	// updateAction defines the update action for the form.

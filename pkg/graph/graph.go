@@ -1,8 +1,8 @@
 package graph
 
 import (
+	"github.com/Alfagov/goDashboard/internal/toolbox"
 	"github.com/Alfagov/goDashboard/models"
-	"github.com/Alfagov/goDashboard/toolbox"
 	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/oklog/ulid/v2"

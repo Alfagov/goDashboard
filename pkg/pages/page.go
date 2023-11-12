@@ -1,7 +1,7 @@
 package pages
 
 import (
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/a-h/templ"

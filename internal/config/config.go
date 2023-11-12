@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"os"

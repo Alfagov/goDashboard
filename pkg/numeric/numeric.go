@@ -1,7 +1,7 @@
 package numeric
 
 import (
-	"github.com/Alfagov/goDashboard/htmx"
+	"github.com/Alfagov/goDashboard/internal/htmx"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"

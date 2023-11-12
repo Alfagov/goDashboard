@@ -3,10 +3,10 @@ package form
 import (
 	"errors"
 	"fmt"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"github.com/a-h/templ"
 	"go.uber.org/zap"
 	"net/http"
@@ -29,11 +29,11 @@ func (fw *formImpl[F]) setUpdateHandler(
 func (fw *formImpl[F]) updateAction(data *UpdateResponse) templ.Component {
 
 	if !data.Success {
-		element := templates.ErrorAlert(data.Title, data.Message)
+		element := views.ErrorAlert(data.Title, data.Message)
 		return element
 	}
 
-	element := templates.SuccessAlert(data.Title, data.Message)
+	element := views.SuccessAlert(data.Title, data.Message)
 	return element
 }
 

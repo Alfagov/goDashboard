@@ -2,8 +2,8 @@ package dashboard
 
 import (
 	_ "embed"
-	"github.com/Alfagov/goDashboard/config"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/config"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"go.uber.org/zap"

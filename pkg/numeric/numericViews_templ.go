@@ -9,8 +9,8 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/Alfagov/goDashboard/htmx"
-import "github.com/Alfagov/goDashboard/layout"
+import "github.com/Alfagov/goDashboard/internal/htmx"
+import "github.com/Alfagov/goDashboard/internal/layout"
 
 func NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *layout.WidgetLayout) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {

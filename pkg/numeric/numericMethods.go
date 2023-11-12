@@ -1,7 +1,7 @@
 package numeric
 
 import (
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"go.uber.org/zap"
@@ -57,35 +57,30 @@ func (n *numeric) setUnit(unit string) {
 // Returns a RenderResponse containing the component's HTML or an error if one occurred during rendering.
 func (n *numeric) Render(req models.RequestWrapper) *components.RenderResponse {
 
+	var err error
+	value := n.initialValue
+
 	if req != nil {
-		value, err := n.updateHandler()
+		value, err = n.updateHandler()
 		if err != nil {
 			return &components.RenderResponse{
 				Err: err,
 			}
-		}
-
-		return &components.RenderResponse{
-			Component: NumericWidget(
-				n.baseWidget.GetName(),
-				strconv.Itoa(value),
-				n.unit,
-				n.unitAfter,
-				n.htmxOpts.GetHtmx(),
-				n.baseWidget.GetLayout()),
 		}
 	}
 
 	return &components.RenderResponse{
 		Component: NumericWidget(
 			n.baseWidget.GetName(),
-			strconv.Itoa(n.initialValue),
+			strconv.Itoa(value),
 			n.unit,
 			n.unitAfter,
 			n.htmxOpts.GetHtmx(),
 			n.baseWidget.GetLayout()),
 	}
 }
+
+// generate test for above Render function
 
 func (n *numeric) Type() components.NodeType {
 	return components.NumericWidgetType

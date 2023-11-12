@@ -2,11 +2,11 @@ package dashboard
 
 import (
 	"embed"
-	"github.com/Alfagov/goDashboard/config"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/config"
+	"github.com/Alfagov/goDashboard/internal/logger"
+	"github.com/Alfagov/goDashboard/internal/utils"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/utils"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	fLogger "github.com/gofiber/fiber/v2/middleware/logger"

@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"github.com/Alfagov/goDashboard/layout"
+	"github.com/Alfagov/goDashboard/internal/layout"
 )
 
 // BaseWidget represents the fundamental structure of a UI widget.
@@ -44,6 +44,8 @@ type Widget interface {
 	GetId() string
 	// GetName returns the display name of the widget.
 	GetName() string
+	// GetDescription returns the description of the widget
+	GetDescription() string
 }
 
 // NewWidget creates and returns a new instance of a Widget with a default layout configuration.
@@ -100,4 +102,8 @@ func (b *BaseWidget) withLayout(layout *layout.WidgetLayout) {
 
 func (b *BaseWidget) GetRow() int {
 	return b.Layout.Row
+}
+
+func (b *BaseWidget) GetDescription() string {
+	return b.Description
 }
