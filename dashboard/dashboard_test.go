@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"github.com/Alfagov/goDashboard/internal/config"
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/internal/utils"
 	"github.com/Alfagov/goDashboard/models"
@@ -10,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -415,6 +417,28 @@ func Test_dashboard_UpdateSpec(t *testing.T) {
 			if got := d.UpdateSpec(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("UpdateSpec() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestInitDashboardGlobals(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "test init dashboard globals",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			os.Setenv("GD_CONFIG_NAME", "test_config")
+			os.Setenv("GD_CONFIG_PATH", "../test")
+			os.Setenv("GD_CONFIG_TYPE", "yaml")
+
+			InitDashboardGlobals()
+
+			assert.NotNil(t, logger.L)
+			assert.NotNil(t, config.C)
 		})
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
-	"github.com/oklog/ulid/v2"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -76,14 +76,15 @@ func newNumeric() *numeric {
 // baseSetters: a variadic list of functions that configure the base properties of the widget.
 //
 // Returns a newly initialized Numeric widget configured with the provided settings and ready for use.
-func NewNumeric(updateInterval time.Duration, baseSetters ...func(n widgets.Widget)) Numeric {
+func NewNumeric(name string, updateInterval time.Duration, baseSetters ...func(n widgets.Widget)) Numeric {
 	widget := newNumeric()
+	widget.baseWidget.SetName(name)
 
 	for _, setter := range baseSetters {
 		setter(widget.baseWidget)
 	}
 
-	id := "numericWidget_" + ulid.Make().String()
+	id := "numericWidget_" + uuid.New().String()
 	widget.baseWidget.SetId(id)
 
 	widget.htmxOpts.AppendToPath("widget", id)

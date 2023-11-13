@@ -10,8 +10,8 @@ import "io"
 import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
-import "github.com/Alfagov/goDashboard/htmx"
-import "github.com/Alfagov/goDashboard/layout"
+import "github.com/Alfagov/goDashboard/internal/htmx"
+import "github.com/Alfagov/goDashboard/internal/layout"
 
 func GenericForm(formTitle string, fields []templ.Component, widgetLayout *layout.WidgetLayout, htmx *htmx.Htmx) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {

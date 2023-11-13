@@ -2,7 +2,6 @@ package form
 
 import (
 	"errors"
-	"fmt"
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
@@ -98,35 +97,29 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 		if req.Method() == http.MethodPost {
 			inputData, err := fw.process(req)
 			if err != nil {
-				return &components.RenderResponse{
-					Err: err,
-				}
+				return components.NewRenderResponse(nil, nil, err)
 			}
 
 			data := fw.updateHandler(*inputData)
-			return &components.RenderResponse{
-				Component: fw.updateAction(data),
-			}
+			return components.NewRenderResponse(fw.updateAction(data), nil, nil)
 		}
 
-		if req.Query(ActionSelectFieldQuery) == "select" {
+		if req.Query(ActionSelectFieldQuery) == ActionSelectValue {
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
-					return &components.RenderResponse{
-						Component: SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
-							field.Name+"options"),
-					}
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
 				}
 			}
 		}
 
-		if req.Query(ActionSelectFieldQuery) == "select-remote" {
+		if req.Query(ActionSelectFieldQuery) == ActionSelectRemoteValue {
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
-					return &components.RenderResponse{
-						Component: SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
-							field.Name+"options"),
-					}
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
 				}
 			}
 		}
@@ -137,14 +130,13 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 		fieldsComponent = append(fieldsComponent, FormField(*field, fw.spec.Route))
 	}
 
-	return &components.RenderResponse{
-		Component: GenericForm(
+	return components.NewRenderResponse(
+		GenericForm(
 			fw.Name(),
 			fieldsComponent,
 			fw.baseWidget.GetLayout(),
 			fw.htmxOpts.GetHtmx(),
-		),
-	}
+		), nil, nil)
 }
 
 func (fw *formImpl[F]) Type() components.NodeType {
@@ -228,15 +220,8 @@ func toFieldArray(t reflect.Type) []*models.Field {
 		tp := tag.Get(TypeStructTag)
 
 		field := FieldMap[tp](name, label)
-		if tp == "select" {
-			field.Route = fmt.Sprintf("?%s=select&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
-		}
 
-		if tp == "select-remote" {
-			field.Route = fmt.Sprintf("?%s=select-remote&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
-		}
-
-		fields = append(fields, &field)
+		fields = append(fields, field)
 	}
 
 	return fields

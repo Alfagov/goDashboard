@@ -47,6 +47,14 @@ type RenderResponse struct {
 	Err       error
 }
 
+func NewRenderResponse(component templ.Component, json map[string]interface{}, err error) *RenderResponse {
+	return &RenderResponse{
+		Component: component,
+		Json:      json,
+		Err:       err,
+	}
+}
+
 // nodeType defines a structure to represent the type and supertype of a UI component node.
 // It facilitates type checks and hierarchical relationships within UI components.
 type nodeType struct {

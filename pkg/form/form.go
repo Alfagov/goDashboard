@@ -8,15 +8,17 @@ import (
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
-	"github.com/oklog/ulid/v2"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
 const (
-	ActionSelectFieldQuery = "action_select_field"
-	NameSelectFieldQuery   = "name_select_field"
-	LabelStructTag         = "label"
-	TypeStructTag          = "type"
+	ActionSelectFieldQuery  = "action_select_field"
+	NameSelectFieldQuery    = "name_select_field"
+	ActionSelectValue       = "select"
+	ActionSelectRemoteValue = "select-remote"
+	LabelStructTag          = "label"
+	TypeStructTag           = "type"
 )
 
 // Form is an interface that defines a structure for form-based components.
@@ -71,7 +73,7 @@ func NewFormWidget[F any](name string, setters ...func(n widgets.Widget)) Form[F
 		setter(widget.baseWidget)
 	}
 
-	id := "formWidget_" + name + "_" + ulid.Make().String()
+	id := "formWidget_" + name + "_" + uuid.New().String()
 	widget.baseWidget.SetId(id)
 	widget.htmxOpts.AppendToPath("widget", id)
 
