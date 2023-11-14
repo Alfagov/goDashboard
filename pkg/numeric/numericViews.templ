@@ -1,0 +1,22 @@
+package numeric
+
+import "github.com/Alfagov/goDashboard/internal/htmx"
+import "github.com/Alfagov/goDashboard/internal/layout"
+
+templ NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *layout.WidgetLayout) {
+	<div
+ 		class={ layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg" }
+ 		hx-get={ "/" + htmx.Route.String() }
+ 		hx-trigger={ "every " + htmx.Interval }
+ 		hx-target={ htmx.Target }
+ 		hx-swap={ htmx.Swap }
+	>
+		<p class="text-gray-600">{ title }</p>
+		if unitAfter {
+			<h2 class="text-3xl font-bold">{ value }{ unit }</h2>
+		} else {
+			<h2 class="text-3xl font-bold">{ unit }{ value }</h2>
+		}
+		
+	</div>
+}

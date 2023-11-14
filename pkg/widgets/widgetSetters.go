@@ -1,44 +1,26 @@
 package widgets
 
-import "github.com/Alfagov/goDashboard/models"
+import (
+	"github.com/Alfagov/goDashboard/internal/layout"
+)
 
+// SetName returns a function that sets the name of a Widget to the specified string.
 func SetName(name string) func(f Widget) {
 	return func(f Widget) {
 		f.SetName(name)
 	}
 }
 
+// SetDescription returns a function that sets the description of a Widget to the specified string.
 func SetDescription(description string) func(f Widget) {
 	return func(f Widget) {
 		f.setDescription(description)
 	}
 }
-func SetHeight(height int) func(Widget) {
-	return func(f Widget) {
-		f.setHeight(height)
-	}
-}
 
-func SetWidth(width int) func(Widget) {
-	return func(f Widget) {
-		f.setWidth(width)
-	}
-}
-
-func SetLayout(layout *models.WidgetLayout) func(Widget) {
+// SetLayout returns a function that assigns a specific WidgetLayout to a Widget.
+func SetLayout(layout *layout.WidgetLayout) func(Widget) {
 	return func(f Widget) {
 		f.withLayout(layout)
-	}
-}
-
-func SetRow(row int) func(Widget) {
-	return func(f Widget) {
-		f.setRow(row)
-	}
-}
-
-func SetColumn(column int) func(Widget) {
-	return func(f Widget) {
-		f.setColumn(column)
 	}
 }

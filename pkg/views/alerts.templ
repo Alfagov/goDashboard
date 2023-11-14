@@ -1,0 +1,26 @@
+package views
+
+templ ErrorAlert(title string, message string) {
+	<div role="alert" class="mb-2" _="on load transition my opacity to 0 over 4s then remove me">
+		<div class="bg-red-500 text-white font-bold rounded-t px-4 py-2  flex justify-between items-center">
+			{ title }
+            <button class="ml-4 rounded hover:bg-red-600 p-1" _="on click transition my opacity to 0 then remove me">X</button>
+		</div>
+		<div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+			<p>{ message }</p>
+		</div>
+	</div>
+}
+
+templ SuccessAlert(title string, message string) {
+	<div role="alert" class="mb-2" _="on load transition my opacity to 0 over 4s then remove me">
+		<div class="bg-green-500 text-white font-bold rounded-t px-4 py-2  flex justify-between items-center">
+			{ title }
+            <button class="ml-4 rounded hover:bg-red-600 p-1" _="on click transition my opacity to 0 then remove me">X</button>
+		</div>
+		<div class="border border-t-0 border-green-400 rounded-b bg-green-100 px-4 py-3 text-green-700">
+			<p>{ message }</p>
+		</div>
+	</div>
+}
+

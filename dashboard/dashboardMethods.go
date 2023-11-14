@@ -2,16 +2,20 @@ package dashboard
 
 import (
 	_ "embed"
-	"github.com/Alfagov/goDashboard/config"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/config"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
 	"go.uber.org/zap"
 )
 
 // Dashboard interface implementation
 
+// Run configures and starts the dashboard server. It establishes static routes and dynamic routes for the application.
+// Based on the configuration, it either starts an HTTPS server with the provided SSL certificate and key,
+// or an HTTP server if SSL is not configured. Before listening, it updates the tree specification for the UI components
+// and visualizes the component tree for debugging or informational purposes.
+// If an error occurs during the server startup, it returns the error.
 func (d *dashboard) Run() error {
 
 	d.CreateStaticRoutes()
@@ -30,9 +34,15 @@ func (d *dashboard) Run() error {
 	return d.Router.Listen(dashboardUrl)
 }
 
+// WithPages takes a variadic list of UIComponent pages to be added to the dashboard.
+// Each page is attempted to be added as a child to the dashboard; if an error occurs, it logs the error.
+// It returns the dashboard instance to allow method chaining.
 func (d *dashboard) WithPages(pages ...components.UIComponent) Dashboard {
 	for _, page := range pages {
-		d.AddChild(page)
+		err := d.AddChild(page)
+		if err != nil {
+			logger.L.Error("Dashboard: error adding child", zap.Error(err))
+		}
 	}
 
 	return d
@@ -40,9 +50,9 @@ func (d *dashboard) WithPages(pages ...components.UIComponent) Dashboard {
 
 // UIComponent interface implementation
 
-func (d *dashboard) Render(components.RequestWrapper) *components.RenderResponse {
+func (d *dashboard) Render(models.RequestWrapper) *components.RenderResponse {
 	return &components.RenderResponse{
-		Component: templates.ListGridPage(d.treeSpec.Children),
+		Component: ListGridPage(d.treeSpec.Children),
 	}
 }
 
@@ -121,7 +131,7 @@ func (d *dashboard) AddChild(child components.UIComponent) error {
 	return nil
 }
 
-func (d *dashboard) KillChild(child components.UIComponent) error {
+func (d *dashboard) RemoveChild(child components.UIComponent) error {
 	_, exists := d.Children[child.Name()]
 	if !exists {
 		return components.ErrChildNotFound(child.Name())

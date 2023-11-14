@@ -1,0 +1,33 @@
+package pages
+
+import "github.com/Alfagov/goDashboard/models"
+
+templ GridPage(widgets []templ.Component) {
+    for _, widget := range widgets {
+        {! widget }
+    }
+}
+
+templ Aside(descriptor []*models.TreeSpec) {
+    <aside class="col-span-1 row-start-1 row-end-6 rounded bg-white p-4 shadow-lg">
+        <h2 class="mb-4 text-lg font-semibold">Menu</h2>
+        <ul>
+            for _, page := range descriptor {
+            <li class="mb-2">
+                <a onclick="disposeAllCharts()" hx-target="#page-content" hx-get={ "/" + page.Route } hx-swap="outerHTML" hx-select="#page-content" class="text-gray-700">{ page.Name }</a>
+            </li>
+            }
+        </ul>
+    </aside>
+}
+
+templ PageContainerView(page templ.Component, descriptor []*models.TreeSpec) {
+    <main class="grid h-full grid-cols-4 grid-rows-6 gap-6">
+        @Aside(descriptor)
+        <section class="col-span-3 rounded p-4">
+            <div id="page-content" class="grid grid-cols-3 gap-4">
+                {! page }
+            </div>
+        </section>
+    </main>
+}

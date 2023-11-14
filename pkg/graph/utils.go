@@ -2,8 +2,8 @@ package graph
 
 import (
 	"context"
+	"github.com/Alfagov/goDashboard/internal/utils"
 	"github.com/Alfagov/goDashboard/models"
-	"github.com/Alfagov/goDashboard/utils"
 	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"

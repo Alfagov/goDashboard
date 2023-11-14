@@ -2,53 +2,45 @@ package form
 
 import (
 	"errors"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"github.com/a-h/templ"
+	"go.uber.org/zap"
+	"net/http"
+	"reflect"
 )
 
 // Form interface implementation
 
-func (fw *formImpl) addFormFields(field ...*models.FormField) {
+func (fw *formImpl[F]) addFormFields(field ...*models.Field) {
 	fw.fields = append(fw.fields, field...)
 }
 
-func (fw *formImpl) addFormButtons(button ...*models.FormButton) {
-	fw.buttons = append(fw.buttons, button...)
-}
-
-func (fw *formImpl) addFormCheckboxes(checkbox ...*models.FormCheckbox) {
-	fw.checkboxes = append(fw.checkboxes, checkbox...)
-}
-
-func (fw *formImpl) setUpdateHandler(
-	handler func(c components.RequestWrapper) *models.UpdateResponse,
+func (fw *formImpl[F]) setUpdateHandler(
+	handler func(c F) *UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
 }
 
-func (fw *formImpl) setInitialValue(value models.UpdateResponse) {
-	fw.initialValue = value
-}
-
-func (fw *formImpl) updateAction(data *models.UpdateResponse) templ.Component {
+func (fw *formImpl[F]) updateAction(data *UpdateResponse) templ.Component {
 
 	if !data.Success {
-		element := templates.ErrorAlert(data.Title, data.Message)
+		element := views.ErrorAlert(data.Title, data.Message)
 		return element
 	}
 
-	element := templates.SuccessAlert(data.Title, data.Message)
+	element := views.SuccessAlert(data.Title, data.Message)
 	return element
 }
 
-func (fw *formImpl) WithSettings(
+func (fw *formImpl[F]) WithSettings(
 	settings ...func(
-		f Form,
+		f Form[F],
 	),
-) Form {
+) Form[F] {
 	for _, setter := range settings {
 		setter(fw)
 	}
@@ -56,95 +48,181 @@ func (fw *formImpl) WithSettings(
 	return fw
 }
 
-// UIComponent interface implementation
+func (fw *formImpl[F]) process(req models.RequestWrapper) (*F, error) {
 
-func (fw *formImpl) Render(req components.RequestWrapper) *components.RenderResponse {
-
-	if req != nil && req.Method() == "POST" {
-		data := fw.updateHandler(req)
-		return &components.RenderResponse{
-			Component: fw.updateAction(data),
+	var data F
+	if req != nil {
+		err := req.BindFormRequest(&data)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	fields := fw.fields
-	buttons := fw.buttons
-	checkboxes := fw.checkboxes
-
-	var fieldsComponent []templ.Component
-	for _, field := range fields {
-		fieldsComponent = append(fieldsComponent, templates.FormField(field))
-	}
-
-	return &components.RenderResponse{
-		Component: templates.GenericForm(
-			fw.Name(),
-			fieldsComponent,
-			checkboxes,
-			buttons,
-			fw.baseWidget.GetLayout(),
-			fw.htmxOpts.GetHtmx(),
-		),
-	}
+	return &data, nil
 }
 
-func (fw *formImpl) Type() components.NodeType {
+func (fw *formImpl[F]) validate(data F) error {
+	return fw.validator.Struct(data)
+}
+
+func (fw *formImpl[F]) generate() error {
+	var data F
+	v := reflect.ValueOf(data)
+	if v.Kind() != reflect.Struct {
+		return errors.New("invalid type")
+	}
+
+	t := v.Type()
+
+	fw.fields = toFieldArray(t)
+
+	return nil
+}
+
+func (fw *formImpl[F]) setSelectHandler(fieldName string, handler func(string) []string) {
+	for _, field := range fw.fields {
+		if field.Name == fieldName {
+			field.SelectHandler = handler
+		}
+	}
+
+	logger.L.Error("field not found")
+}
+
+// UIComponent interface implementation
+
+func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderResponse {
+
+	if req != nil {
+		if req.Method() == http.MethodPost {
+			inputData, err := fw.process(req)
+			if err != nil {
+				return components.NewRenderResponse(nil, nil, err)
+			}
+
+			data := fw.updateHandler(*inputData)
+			return components.NewRenderResponse(fw.updateAction(data), nil, nil)
+		}
+
+		if req.Query(ActionSelectFieldQuery) == ActionSelectValue {
+			for _, field := range fw.fields {
+				if field.Name == req.Query(NameSelectFieldQuery) {
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
+				}
+			}
+		}
+
+		if req.Query(ActionSelectFieldQuery) == ActionSelectRemoteValue {
+			for _, field := range fw.fields {
+				if field.Name == req.Query(NameSelectFieldQuery) {
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
+				}
+			}
+		}
+	}
+
+	var fieldsComponent []templ.Component
+	for _, field := range fw.fields {
+		fieldsComponent = append(fieldsComponent, FormField(*field, fw.spec.Route))
+	}
+
+	return components.NewRenderResponse(
+		GenericForm(
+			fw.Name(),
+			fieldsComponent,
+			fw.baseWidget.GetLayout(),
+			fw.htmxOpts.GetHtmx(),
+		), nil, nil)
+}
+
+func (fw *formImpl[F]) Type() components.NodeType {
 	return components.FormWidgetType
 }
 
-func (fw *formImpl) Name() string {
+func (fw *formImpl[F]) Name() string {
 	return fw.baseWidget.GetName()
 }
 
-func (fw *formImpl) UpdateSpec() *models.TreeSpec {
+func (fw *formImpl[F]) UpdateSpec() *models.TreeSpec {
 	route := components.GetRouteFromParents(fw)
 
-	fw.htmxOpts.AddBeforePath(route)
-	return &models.TreeSpec{
+	err := fw.htmxOpts.AddBeforePath(route)
+	if err != nil {
+		logger.L.Error("error in updating spec", zap.Error(err))
+	}
+
+	spec := &models.TreeSpec{
 		Name:        fw.Name(),
 		ImageRoute:  "",
 		Description: fw.description,
 		Route:       fw.htmxOpts.GetUrl(),
 		Children:    nil,
 	}
+
+	fw.spec = spec
+
+	return spec
 }
 
-func (fw *formImpl) GetSpec() *models.TreeSpec {
+func (fw *formImpl[F]) GetSpec() *models.TreeSpec {
 	return fw.spec
 }
 
-func (fw *formImpl) GetChildren() []components.UIComponent {
+func (fw *formImpl[F]) GetChildren() []components.UIComponent {
 	return nil
 }
 
-func (fw *formImpl) FindChild(string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChild(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) Id() string {
+func (fw *formImpl[F]) Id() string {
 	return fw.baseWidget.GetId()
 }
 
-func (fw *formImpl) FindChildById(string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChildById(string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) FindChildByType(string, string) (components.UIComponent, bool) {
+func (fw *formImpl[F]) FindChildByType(string, string) (components.UIComponent, bool) {
 	return nil, false
 }
 
-func (fw *formImpl) SetParent(parent components.UIComponent) {
+func (fw *formImpl[F]) SetParent(parent components.UIComponent) {
 	fw.parent = parent
 }
 
-func (fw *formImpl) GetParent() components.UIComponent {
+func (fw *formImpl[F]) GetParent() components.UIComponent {
 	return fw.parent
 }
 
-func (fw *formImpl) AddChild(components.UIComponent) error {
+func (fw *formImpl[F]) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (fw *formImpl) KillChild(components.UIComponent) error {
+func (fw *formImpl[F]) RemoveChild(components.UIComponent) error {
 	return errors.New("not applicable")
+}
+
+// Utils
+
+func toFieldArray(t reflect.Type) []*models.Field {
+	var fields []*models.Field
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag
+
+		name := t.Field(i).Name
+		label := tag.Get(LabelStructTag)
+		tp := tag.Get(TypeStructTag)
+
+		field := FieldMap[tp](name, label)
+
+		fields = append(fields, field)
+	}
+
+	return fields
 }
