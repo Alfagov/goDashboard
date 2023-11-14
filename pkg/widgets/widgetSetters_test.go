@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"github.com/Alfagov/goDashboard/internal/layout"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -35,17 +36,30 @@ func TestWidgetSetters(t *testing.T) {
 		{
 			name: "test set layout",
 			args: args{
-				setter: SetLayout(nil),
+				setter: SetLayout(&layout.WidgetLayout{
+					Row:    1,
+					Column: 2,
+					Width:  3,
+					Height: 4,
+				}),
 			},
 			want: &BaseWidget{
-				Layout: 3,
+				Layout: &layout.WidgetLayout{
+					Row:    1,
+					Column: 2,
+					Width:  3,
+					Height: 4,
+				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			assert.Equal(t, tt.want, got)
+			baseW := &BaseWidget{}
+			tt.args.setter(baseW)
+
+			assert.Equal(t, tt.want, baseW)
 
 		})
 	}

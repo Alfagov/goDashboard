@@ -1,6 +1,6 @@
 package test
 
-// fixedRand is an io.Reader that always returns the same sequence of bytes
+// FixedRand fixedRand is an io.Reader that always returns the same sequence of bytes
 type FixedRand struct{}
 
 func (r FixedRand) Read(p []byte) (n int, err error) {

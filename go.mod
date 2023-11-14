@@ -1,12 +1,11 @@
 module github.com/Alfagov/goDashboard
 
-go 1.21.3
+go 1.21.4
 
 require (
 	github.com/a-h/templ v0.2.432
 	github.com/go-echarts/go-echarts/v2 v2.3.2
-	github.com/gofiber/fiber/v2 v2.50.0
-	github.com/oklog/ulid/v2 v2.1.0
+	github.com/gofiber/fiber/v2 v2.51.0
 	go.uber.org/zap v1.26.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -34,7 +33,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
