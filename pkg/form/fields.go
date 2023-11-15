@@ -1,10 +1,19 @@
 package form
 
 import (
+	"fmt"
 	"github.com/Alfagov/goDashboard/models"
 )
 
-var FieldMap = map[string]func(name string, label string) models.Field{
+// UpdateResponse represents the outcome of an update operation, including a success flag, a message explaining the result,
+// and a title for the response, which could be used for display in UI notifications or logs.
+type UpdateResponse struct {
+	Success bool
+	Message string
+	Title   string
+}
+
+var FieldMap = map[string]func(name string, label string) *models.Field{
 	"button":         ButtonField,
 	"checkbox":       CheckboxField,
 	"color":          ColorField,
@@ -32,197 +41,197 @@ var FieldMap = map[string]func(name string, label string) models.Field{
 }
 
 var (
-	ButtonField = func(name string, label string) models.Field {
-		return models.Field{
+	ButtonField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "button",
 		}
 	}
 
-	CheckboxField = func(name string, label string) models.Field {
-		return models.Field{
+	CheckboxField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "checkbox",
 		}
 	}
 
-	ColorField = func(name string, label string) models.Field {
-		return models.Field{
+	ColorField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "color",
 		}
 	}
 
-	DateField = func(name string, label string) models.Field {
-		return models.Field{
+	DateField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "date",
 		}
 	}
 
-	DateTimeLocalField = func(name string, label string) models.Field {
-		return models.Field{
+	DateTimeLocalField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "datetime-local",
 		}
 	}
 
-	EmailField = func(name string, label string) models.Field {
-		return models.Field{
+	EmailField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "email",
 		}
 	}
 
-	FileField = func(name string, label string) models.Field {
-		return models.Field{
+	FileField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "file",
 		}
 	}
 
-	HiddenField = func(name string, label string) models.Field {
-		return models.Field{
+	HiddenField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "hidden",
 		}
 	}
 
-	ImageField = func(name string, label string) models.Field {
-		return models.Field{
+	ImageField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "image",
 		}
 	}
 
-	MonthField = func(name string, label string) models.Field {
-		return models.Field{
+	MonthField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "month",
 		}
 	}
 
-	NumberField = func(name string, label string) models.Field {
-		return models.Field{
+	NumberField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "number",
 		}
 	}
 
-	PasswordField = func(name string, label string) models.Field {
-		return models.Field{
+	PasswordField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "password",
 		}
 	}
 
-	RadioField = func(name string, label string) models.Field {
-		return models.Field{
+	RadioField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "radio",
 		}
 	}
 
-	RangeField = func(name string, label string) models.Field {
-		return models.Field{
+	RangeField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "range",
 		}
 	}
 
-	ResetField = func(name string, label string) models.Field {
-		return models.Field{
+	ResetField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "reset",
 		}
 	}
 
-	SearchField = func(name string, label string) models.Field {
-		return models.Field{
+	SearchField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "search",
 		}
 	}
 
-	SubmitField = func(name string, label string) models.Field {
-		return models.Field{
+	SubmitField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "submit",
 		}
 	}
 
-	TelField = func(name string, label string) models.Field {
-		return models.Field{
+	TelField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "tel",
 		}
 	}
 
-	TextField = func(name string, label string) models.Field {
-		return models.Field{
+	TextField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "text",
 		}
 	}
 
-	TimeField = func(name string, label string) models.Field {
-		return models.Field{
+	TimeField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "time",
 		}
 	}
 
-	URLField = func(name string, label string) models.Field {
-		return models.Field{
+	URLField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "url",
 		}
 	}
 
-	WeekField = func(name string, label string) models.Field {
-		return models.Field{
+	WeekField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "week",
 		}
 	}
 
-	SelectField = func(name string, label string) models.Field {
-		return models.Field{
+	SelectField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "select",
-			Route: "",
+			Route: fmt.Sprintf("?%s=select&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name),
 		}
 	}
 
-	SelectRemoteField = func(name string, label string) models.Field {
-		return models.Field{
+	SelectRemoteField = func(name string, label string) *models.Field {
+		return &models.Field{
 			Name:  name,
 			Label: label,
 			Type:  "select-remote",
-			Route: "",
+			Route: fmt.Sprintf("?%s=select-remote&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name),
 		}
 	}
 )

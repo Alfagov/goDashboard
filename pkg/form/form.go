@@ -1,22 +1,24 @@
 package form
 
 import (
-	"github.com/Alfagov/goDashboard/htmx"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/htmx"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"
-	"github.com/oklog/ulid/v2"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
 const (
-	ActionSelectFieldQuery = "action_select_field"
-	NameSelectFieldQuery   = "name_select_field"
-	LabelStructTag         = "label"
-	TypeStructTag          = "type"
+	ActionSelectFieldQuery  = "action_select_field"
+	NameSelectFieldQuery    = "name_select_field"
+	ActionSelectValue       = "select"
+	ActionSelectRemoteValue = "select-remote"
+	LabelStructTag          = "label"
+	TypeStructTag           = "type"
 )
 
 // Form is an interface that defines a structure for form-based components.
@@ -26,16 +28,17 @@ type Form[F any] interface {
 
 	// setUpdateHandler sets a custom handler used to handle the form update request.
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
-	setUpdateHandler(handler func(c F) *models.UpdateResponse)
+	setUpdateHandler(handler func(c F) *UpdateResponse)
 
 	// addFormFields allows adding multiple fields to the form.
 	addFormFields(field ...*models.Field)
 
+	// setSelectHandler sets the select handler for the field with fieldName
 	setSelectHandler(fieldName string, handler func(string) []string)
 
 	// updateAction defines the update action for the form.
 	// Returns a template component for rendering.
-	updateAction(data *models.UpdateResponse) templ.Component
+	updateAction(data *UpdateResponse) templ.Component
 
 	// WithSettings allows applying multiple settings to the form.
 	// Returns the modified form.
@@ -47,7 +50,7 @@ type formImpl[F any] struct {
 	validator     *validator.Validate
 	fields        []*models.Field
 	popUpResponse bool
-	updateHandler func(c F) *models.UpdateResponse
+	updateHandler func(c F) *UpdateResponse
 	description   string
 	spec          *models.TreeSpec
 	parent        components.UIComponent
@@ -70,7 +73,7 @@ func NewFormWidget[F any](name string, setters ...func(n widgets.Widget)) Form[F
 		setter(widget.baseWidget)
 	}
 
-	id := "formWidget_" + name + "_" + ulid.Make().String()
+	id := "formWidget_" + name + "_" + uuid.New().String()
 	widget.baseWidget.SetId(id)
 	widget.htmxOpts.AppendToPath("widget", id)
 

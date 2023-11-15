@@ -2,11 +2,10 @@ package form
 
 import (
 	"errors"
-	"fmt"
-	"github.com/Alfagov/goDashboard/logger"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"github.com/a-h/templ"
 	"go.uber.org/zap"
 	"net/http"
@@ -20,20 +19,20 @@ func (fw *formImpl[F]) addFormFields(field ...*models.Field) {
 }
 
 func (fw *formImpl[F]) setUpdateHandler(
-	handler func(c F) *models.UpdateResponse,
+	handler func(c F) *UpdateResponse,
 
 ) {
 	fw.updateHandler = handler
 }
 
-func (fw *formImpl[F]) updateAction(data *models.UpdateResponse) templ.Component {
+func (fw *formImpl[F]) updateAction(data *UpdateResponse) templ.Component {
 
 	if !data.Success {
-		element := templates.ErrorAlert(data.Title, data.Message)
+		element := views.ErrorAlert(data.Title, data.Message)
 		return element
 	}
 
-	element := templates.SuccessAlert(data.Title, data.Message)
+	element := views.SuccessAlert(data.Title, data.Message)
 	return element
 }
 
@@ -49,7 +48,7 @@ func (fw *formImpl[F]) WithSettings(
 	return fw
 }
 
-func (fw *formImpl[F]) process(req components.RequestWrapper) (*F, error) {
+func (fw *formImpl[F]) process(req models.RequestWrapper) (*F, error) {
 
 	var data F
 	if req != nil {
@@ -92,41 +91,35 @@ func (fw *formImpl[F]) setSelectHandler(fieldName string, handler func(string) [
 
 // UIComponent interface implementation
 
-func (fw *formImpl[F]) Render(req components.RequestWrapper) *components.RenderResponse {
+func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderResponse {
 
 	if req != nil {
 		if req.Method() == http.MethodPost {
 			inputData, err := fw.process(req)
 			if err != nil {
-				return &components.RenderResponse{
-					Err: err,
-				}
+				return components.NewRenderResponse(nil, nil, err)
 			}
 
 			data := fw.updateHandler(*inputData)
-			return &components.RenderResponse{
-				Component: fw.updateAction(data),
-			}
+			return components.NewRenderResponse(fw.updateAction(data), nil, nil)
 		}
 
-		if req.Query(ActionSelectFieldQuery) == "select" {
+		if req.Query(ActionSelectFieldQuery) == ActionSelectValue {
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
-					return &components.RenderResponse{
-						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
-							field.Name+"options"),
-					}
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
 				}
 			}
 		}
 
-		if req.Query(ActionSelectFieldQuery) == "select-remote" {
+		if req.Query(ActionSelectFieldQuery) == ActionSelectRemoteValue {
 			for _, field := range fw.fields {
 				if field.Name == req.Query(NameSelectFieldQuery) {
-					return &components.RenderResponse{
-						Component: templates.SelectOptions(field.SelectHandler(req.Query(field.Label, "")),
-							field.Name+"options"),
-					}
+					return components.NewRenderResponse(
+						SelectOptions(field.SelectHandler(req.Query(field.Label, "")), field.Name+"options"),
+						nil, nil)
 				}
 			}
 		}
@@ -134,17 +127,16 @@ func (fw *formImpl[F]) Render(req components.RequestWrapper) *components.RenderR
 
 	var fieldsComponent []templ.Component
 	for _, field := range fw.fields {
-		fieldsComponent = append(fieldsComponent, templates.FormField(*field, fw.spec.Route))
+		fieldsComponent = append(fieldsComponent, FormField(*field, fw.spec.Route))
 	}
 
-	return &components.RenderResponse{
-		Component: templates.GenericForm(
+	return components.NewRenderResponse(
+		GenericForm(
 			fw.Name(),
 			fieldsComponent,
 			fw.baseWidget.GetLayout(),
 			fw.htmxOpts.GetHtmx(),
-		),
-	}
+		), nil, nil)
 }
 
 func (fw *formImpl[F]) Type() components.NodeType {
@@ -212,7 +204,7 @@ func (fw *formImpl[F]) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (fw *formImpl[F]) KillChild(components.UIComponent) error {
+func (fw *formImpl[F]) RemoveChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
@@ -228,15 +220,8 @@ func toFieldArray(t reflect.Type) []*models.Field {
 		tp := tag.Get(TypeStructTag)
 
 		field := FieldMap[tp](name, label)
-		if tp == "select" {
-			field.Route = fmt.Sprintf("?%s=select&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
-		}
 
-		if tp == "select-remote" {
-			field.Route = fmt.Sprintf("?%s=select-remote&%s=%s", ActionSelectFieldQuery, NameSelectFieldQuery, name)
-		}
-
-		fields = append(fields, &field)
+		fields = append(fields, field)
 	}
 
 	return fields

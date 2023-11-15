@@ -2,9 +2,10 @@ package graphContainer
 
 import (
 	"errors"
+	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
-	"github.com/Alfagov/goDashboard/templates"
+	"go.uber.org/zap"
 )
 
 // GraphWidget implementation
@@ -22,7 +23,7 @@ func (g *graphWidgetImpl) WithSettings(settings ...func(gw GraphWidget)) GraphWi
 
 // UIComponent implementation
 
-func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.RenderResponse {
+func (g *graphWidgetImpl) Render(req models.RequestWrapper) *components.RenderResponse {
 	if req != nil {
 		return &components.RenderResponse{
 			Json: g.update(),
@@ -30,7 +31,7 @@ func (g *graphWidgetImpl) Render(req components.RequestWrapper) *components.Rend
 	}
 
 	return &components.RenderResponse{
-		Component: templates.GeneralGraph(
+		Component: GeneralGraph(
 			g.baseWidget.GetId(),
 			g.graph.Encode(g.baseWidget.GetLayout().Height),
 			g.baseWidget.GetLayout(),
@@ -50,7 +51,11 @@ func (g *graphWidgetImpl) Name() string {
 func (g *graphWidgetImpl) UpdateSpec() *models.TreeSpec {
 	route := components.GetRouteFromParents(g)
 
-	g.htmxOpts.AddBeforePath(route)
+	err := g.htmxOpts.AddBeforePath(route)
+	if err != nil {
+		logger.L.Error("error in updating spec", zap.Error(err))
+	}
+
 	return &models.TreeSpec{
 		Name:        g.Name(),
 		ImageRoute:  "",
@@ -96,6 +101,6 @@ func (g *graphWidgetImpl) AddChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
 
-func (g *graphWidgetImpl) KillChild(components.UIComponent) error {
+func (g *graphWidgetImpl) RemoveChild(components.UIComponent) error {
 	return errors.New("not applicable")
 }
