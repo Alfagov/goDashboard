@@ -2,10 +2,11 @@ package dashboard
 
 import (
 	_ "embed"
-	"github.com/Alfagov/goDashboard/internal/config"
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
+	"github.com/Alfagov/goDashboard/pkg/config"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"go.uber.org/zap"
 )
 
@@ -52,7 +53,7 @@ func (d *dashboard) WithPages(pages ...components.UIComponent) Dashboard {
 
 func (d *dashboard) Render(models.RequestWrapper) *components.RenderResponse {
 	return &components.RenderResponse{
-		Component: ListGridPage(d.treeSpec.Children),
+		Component: views.ListGroup(views.TreeSpecToListElements(d.treeSpec.Children)),
 	}
 }
 

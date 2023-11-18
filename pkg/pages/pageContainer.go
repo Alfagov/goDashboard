@@ -4,6 +4,7 @@ import (
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"go.uber.org/zap"
 )
 
@@ -80,7 +81,7 @@ func NewPageContainer(name string, setters ...func(pc PageContainer)) PageContai
 
 func (pc *pageContainer) UpdateSpec() *models.TreeSpec {
 
-	route := pc.parent.Name() + "/" + pc.name
+	route := components.GetRouteFromParents(pc)
 
 	var childrenSpec []*models.TreeSpec
 	for _, child := range pc.children {
@@ -91,7 +92,7 @@ func (pc *pageContainer) UpdateSpec() *models.TreeSpec {
 		Name:        pc.name,
 		ImageRoute:  pc.imagePath,
 		Description: pc.description,
-		Route:       route,
+		Route:       route + pc.name,
 		Children:    childrenSpec,
 	}
 
@@ -105,6 +106,13 @@ func (pc *pageContainer) GetSpec() *models.TreeSpec {
 }
 
 func (pc *pageContainer) Render(req models.RequestWrapper) *components.RenderResponse {
+
+	if req == nil {
+		containerPage := views.ListGroup(views.TreeSpecToListElements(pc.spec.Children))
+		return &components.RenderResponse{
+			Component: PageContainerView(containerPage, pc.spec.Children),
+		}
+	}
 
 	pageName := req.Locals("pageName")
 	if pageName != nil {

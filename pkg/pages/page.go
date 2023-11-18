@@ -4,6 +4,7 @@ import (
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
+	"github.com/Alfagov/goDashboard/pkg/views"
 	"github.com/a-h/templ"
 	"go.uber.org/zap"
 )
@@ -113,7 +114,7 @@ func (p *page) Render(models.RequestWrapper) *components.RenderResponse {
 	}
 
 	return &components.RenderResponse{
-		Component: GridPage(componentList),
+		Component: views.ListGroup(componentList),
 	}
 }
 

@@ -9,8 +9,8 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/Alfagov/goDashboard/htmx"
-import "github.com/Alfagov/goDashboard/layout"
+import "github.com/Alfagov/goDashboard/pkg/htmx"
+import "github.com/Alfagov/goDashboard/pkg/layout"
 
 func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetLayout, htmx *htmx.Htmx) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -25,12 +25,12 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetL
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_2 = []any{layout.ToCSS(widgetLayout) + "mt-30px items-center justify-center bg-white p-4 rounded-lg shadow-lg"}
+		var var_2 = []any{layout.ToCSS(widgetLayout)}
 		err = templ.RenderCSSItems(ctx, templBuffer, var_2...)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("<div hx-ext=\"echarts\" class=\"")
+		_, err = templBuffer.WriteString("<div class=\"")
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,7 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetL
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><div class=\"flex items-center justify-end w-full\"><button hx-target=\"")
+		_, err = templBuffer.WriteString("\"><div class=\"indicator w-full\"><div class=\"indicator-item indicator-bottom\"><button hx-target=\"")
 		if err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetL
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\" hx-swap=\"none\" class=\"btn\" id=\"reloadButton\"><svg xmlns=\"http://www.w3.org/2000/svg\" style=\"height: 20px;width: 20px;\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99\"></path></svg></button></div><div id=\"")
+		_, err = templBuffer.WriteString("\" hx-swap=\"none\" class=\"btn\" id=\"reloadButton\"><svg xmlns=\"http://www.w3.org/2000/svg\" style=\"height: 20px;width: 20px;\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99\"></path></svg></button></div><div hx-ext=\"echarts\" class=\"w-full p-2 items-center justify-center bg-base-200 rounded-lg shadow-lg\"><div id=\"")
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetL
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div></div>")
+		_, err = templBuffer.WriteString("</div></div></div></div>")
 		if err != nil {
 			return err
 		}

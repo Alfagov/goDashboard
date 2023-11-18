@@ -1,8 +1,8 @@
 package form
 
 import (
-	"github.com/Alfagov/goDashboard/internal/htmx"
-	"github.com/Alfagov/goDashboard/internal/layout"
+	"github.com/Alfagov/goDashboard/pkg/htmx"
+	"github.com/Alfagov/goDashboard/pkg/layout"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/Alfagov/goDashboard/test"
 	"github.com/google/uuid"

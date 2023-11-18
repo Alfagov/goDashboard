@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"github.com/Alfagov/goDashboard/internal/layout"
+	"github.com/Alfagov/goDashboard/pkg/layout"
 )
 
 // SetName returns a function that sets the name of a Widget to the specified string.

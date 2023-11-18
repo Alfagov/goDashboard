@@ -1,11 +1,12 @@
 package graph
 
 import (
-	"github.com/Alfagov/goDashboard/internal/toolbox"
 	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/toolbox"
 	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/google/uuid"
+	"strings"
 )
 
 type Graph interface {
@@ -53,7 +54,7 @@ func NewBarGraph(
 
 func (bg *barGraphImpl) Encode(h int) templ.Component {
 	g := barGraphFromData(bg.dataHandler(), bg.stacked)
-	g.ChartID = bg.Id
+	g.ChartID = strings.Replace(bg.Id, "-", "_", -1)
 	if bg.tBox != nil {
 		g.SetGlobalOptions(
 			charts.WithToolboxOpts(bg.tBox.GetToolbox()),
@@ -65,7 +66,7 @@ func (bg *barGraphImpl) Encode(h int) templ.Component {
 
 func (lg *lineGraphImpl) Encode(h int) templ.Component {
 	g := lineGraphFromData(lg.dataHandler())
-	g.ChartID = lg.Id
+	g.ChartID = strings.Replace(lg.Id, "-", "_", -1)
 	if lg.tBox != nil {
 		g.SetGlobalOptions(
 			charts.WithToolboxOpts(lg.tBox.GetToolbox()),
