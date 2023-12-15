@@ -76,22 +76,6 @@ func (r *snippetRenderer) Render(w io.Writer) error {
 // adapted from
 // https://github.com/go-echarts/go-echarts/blob/master/templates/base.go
 // https://github.com/go-echarts/go-echarts/blob/master/templates/header.go
-var baseTpl = `
-<div class="container">
-    <div class="item" id="{{ .ChartID }}" style="width:100%;height:400px;"></div>
-</div>
-<script type="text/javascript">
-    "use strict";
-    var chart{{ .ChartID | safeJS }} = echarts.init(document.getElementById('{{ .ChartID | safeJS }}'), "{{ .Theme }}");
-    var option_{{ .ChartID | safeJS }} = {{ .JSON }};
-    chart{{ .ChartID | safeJS }}.setOption(option_{{ .ChartID | safeJS }});
-    {{- range .JSFunctions.Fns }}
-    {{ . | safeJS }}
-    {{- end }}
-	addChart(chart{{ .ChartID | safeJS }}, {{ .ChartID }}, document.getElementById('{{ .ChartID | safeJS }}'));
-</script>
-`
-
 func getSizedTemplate(h int) string {
 	return fmt.Sprintf(`
 <div class="container">
@@ -109,7 +93,3 @@ func getSizedTemplate(h int) string {
 </script>
 `, "100%", h)
 }
-
-//{{- range .JSAssets.Values }}
-//   <script src="{{ . }}"></script>
-//{{- end }}

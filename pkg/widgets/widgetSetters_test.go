@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"github.com/Alfagov/goDashboard/internal/layout"
+	"github.com/Alfagov/goDashboard/pkg/layout"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

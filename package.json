@@ -1,8 +1,7 @@
 {
-  "dependencies": {
-    "bun": ""
-  },
+  "dependencies": { "bun": "" },
   "devDependencies": {
+    "daisyui": "latest",
     "tailwindcss": "^3.3.3"
   }
 }

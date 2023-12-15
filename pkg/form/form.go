@@ -1,10 +1,10 @@
 package form
 
 import (
-	"github.com/Alfagov/goDashboard/internal/htmx"
 	"github.com/Alfagov/goDashboard/internal/logger"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
+	"github.com/Alfagov/goDashboard/pkg/htmx"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/a-h/templ"
 	"github.com/go-playground/validator/v10"

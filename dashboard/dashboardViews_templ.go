@@ -10,6 +10,7 @@ import "io"
 import "bytes"
 
 import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/pkg/views"
 
 func header() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -182,7 +183,7 @@ func ListGridPage(elements []*models.TreeSpec) templ.Component {
 	})
 }
 
-func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body templ.Component) templ.Component {
+func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body templ.Component, drawerId string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -199,11 +200,11 @@ func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("<body class=\"bg-gray-100 h-screen font-sans flex flex-col\"><div class=\"container mx-auto p-4 h-full\">")
+		_, err = templBuffer.WriteString("<body class=\"h-screen font-sans flex flex-col\">")
 		if err != nil {
 			return err
 		}
-		err = NavbarWidget(name, dashSvg, navElements).Render(ctx, templBuffer)
+		err = NavBar(name, dashSvg, navElements, drawerId).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -211,7 +212,7 @@ func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div><div id=\"alert-reference-element\"></div></body>")
+		_, err = templBuffer.WriteString("<div id=\"alert-reference-element\"></div></body>")
 		if err != nil {
 			return err
 		}
@@ -222,7 +223,7 @@ func IndexPage(name string, dashSvg string, navElements []*models.TreeSpec, body
 	})
 }
 
-func NavbarWidget(name string, dashSvg string, elements []*models.TreeSpec) templ.Component {
+func NavBar(name string, dashSvg string, elements []*models.TreeSpec, drawerId string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -235,15 +236,33 @@ func NavbarWidget(name string, dashSvg string, elements []*models.TreeSpec) temp
 			var_14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<header class=\"flex h-16 items-center border-b px-4 md:px-6 bg-zinc-100/40\"><nav class=\"hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6\"><a class=\"flex items-center gap-2 text-lg font-semibold md:text-base\" href=\"/\"><img src=\"")
+		_, err = templBuffer.WriteString("<div class=\"navbar bg-base-200\">")
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(dashSvg))
-		if err != nil {
-			return err
+		if drawerId != "" {
+			_, err = templBuffer.WriteString("<label for=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(drawerId))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\" class=\"btn btn-primary drawer-button\">")
+			if err != nil {
+				return err
+			}
+			err = views.MenuSVG().Render(ctx, templBuffer)
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</label>")
+			if err != nil {
+				return err
+			}
 		}
-		_, err = templBuffer.WriteString("\" alt=\"goDashboard\" width=\"24\" height=\"24\" style=\"vertical-align:middle;\"><span class=\"\">")
+		_, err = templBuffer.WriteString("<div class=\"flex-1\"><a href=\"/\" class=\"btn btn-ghost text-xl\">")
 		if err != nil {
 			return err
 		}
@@ -252,163 +271,23 @@ func NavbarWidget(name string, dashSvg string, elements []*models.TreeSpec) temp
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</span></a>")
+		_, err = templBuffer.WriteString("</a></div><div class=\"flex-none gap-2\">")
 		if err != nil {
 			return err
 		}
-		for _, element := range elements {
-			err = navField(element).Render(ctx, templBuffer)
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString("</nav>")
+		err = navBarMenu(elements).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		err = SerachBox().Render(ctx, templBuffer)
+		_, err = templBuffer.WriteString("<div class=\"form-control\"><input type=\"text\" placeholder=\"Search\" class=\"input input-bordered w-24 md:w-auto\"></div>")
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</header>")
+		err = navUserDropdown().Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		if !templIsBuffer {
-			_, err = templBuffer.WriteTo(w)
-		}
-		return err
-	})
-}
-
-func navField(element *models.TreeSpec) templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
-		templBuffer, templIsBuffer := w.(*bytes.Buffer)
-		if !templIsBuffer {
-			templBuffer = templ.GetBuffer()
-			defer templ.ReleaseBuffer(templBuffer)
-		}
-		ctx = templ.InitializeContext(ctx)
-		var_16 := templ.GetChildren(ctx)
-		if var_16 == nil {
-			var_16 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		if len(element.Children) > 0 {
-			err = Dropdown(element).Render(ctx, templBuffer)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err = templBuffer.WriteString("<a class=\"text-black\" href=\"")
-			if err != nil {
-				return err
-			}
-			var var_17 templ.SafeURL = templ.URL(element.Route)
-			_, err = templBuffer.WriteString(templ.EscapeString(string(var_17)))
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("\">")
-			if err != nil {
-				return err
-			}
-			var var_18 string = element.Name
-			_, err = templBuffer.WriteString(templ.EscapeString(var_18))
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("</a>")
-			if err != nil {
-				return err
-			}
-		}
-		if !templIsBuffer {
-			_, err = templBuffer.WriteTo(w)
-		}
-		return err
-	})
-}
-
-func Dropdown(element *models.TreeSpec) templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
-		templBuffer, templIsBuffer := w.(*bytes.Buffer)
-		if !templIsBuffer {
-			templBuffer = templ.GetBuffer()
-			defer templ.ReleaseBuffer(templBuffer)
-		}
-		ctx = templ.InitializeContext(ctx)
-		var_19 := templ.GetChildren(ctx)
-		if var_19 == nil {
-			var_19 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"dropdown relative\"><button class=\"dropdown-btn text-black hover:text-gray-500\">")
-		if err != nil {
-			return err
-		}
-		var var_20 string = element.Name
-		_, err = templBuffer.WriteString(templ.EscapeString(var_20))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</button><div class=\"dropdown-menu z-10 hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5\"><div class=\"py-1\">")
-		if err != nil {
-			return err
-		}
-		for _, child := range element.Children {
-			_, err = templBuffer.WriteString("<a href=\"")
-			if err != nil {
-				return err
-			}
-			var var_21 templ.SafeURL = templ.URL(child.Route)
-			_, err = templBuffer.WriteString(templ.EscapeString(string(var_21)))
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("\" class=\"block px-4 py-2 hover:bg-gray-100\">")
-			if err != nil {
-				return err
-			}
-			var var_22 string = child.Name
-			_, err = templBuffer.WriteString(templ.EscapeString(var_22))
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("</a>")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString("</div></div></div>")
-		if err != nil {
-			return err
-		}
-		if !templIsBuffer {
-			_, err = templBuffer.WriteTo(w)
-		}
-		return err
-	})
-}
-
-func SerachBox() templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
-		templBuffer, templIsBuffer := w.(*bytes.Buffer)
-		if !templIsBuffer {
-			templBuffer = templ.GetBuffer()
-			defer templ.ReleaseBuffer(templBuffer)
-		}
-		ctx = templ.InitializeContext(ctx)
-		var_23 := templ.GetChildren(ctx)
-		if var_23 == nil {
-			var_23 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"ml-auto relative\"><input aria-label=\"Search\" class=\"rounded-lg bg-zinc-100 px-4 py-2 outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400\" placeholder=\"Search...\" type=\"search\"><div class=\"absolute right-3 top-3\">")
-		if err != nil {
-			return err
-		}
-		err = searchSvg().Render(ctx, templBuffer)
+		err = navThemeSwitch().Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -423,7 +302,7 @@ func SerachBox() templ.Component {
 	})
 }
 
-func searchSvg() templ.Component {
+func navThemeSwitch() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -431,12 +310,243 @@ func searchSvg() templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_24 := templ.GetChildren(ctx)
-		if var_24 == nil {
-			var_24 = templ.NopComponent
+		var_16 := templ.GetChildren(ctx)
+		if var_16 == nil {
+			var_16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\" h-6 w-6 text-zinc-500\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></svg>")
+		_, err = templBuffer.WriteString("<label class=\"swap swap-rotate\"><!--")
+		if err != nil {
+			return err
+		}
+		var_17 := ` this hidden checkbox controls the state `
+		_, err = templBuffer.WriteString(var_17)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("--><input type=\"checkbox\" class=\"theme-controller\" value=\"light\"><!--")
+		if err != nil {
+			return err
+		}
+		var_18 := ` sun icon `
+		_, err = templBuffer.WriteString(var_18)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("--><svg class=\"swap-on fill-current w-10 h-10\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z\"></path></svg><!--")
+		if err != nil {
+			return err
+		}
+		var_19 := ` moon icon `
+		_, err = templBuffer.WriteString(var_19)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("--><svg class=\"swap-off fill-current w-10 h-10\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z\"></path></svg></label>")
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = templBuffer.WriteTo(w)
+		}
+		return err
+	})
+}
+
+func navUserDropdown() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_20 := templ.GetChildren(ctx)
+		if var_20 == nil {
+			var_20 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, err = templBuffer.WriteString("<div class=\"dropdown dropdown-end\"><label tabindex=\"0\" class=\"avatar btn btn-circle btn-ghost\"><div class=\"w-10 rounded-full\"><img alt=\"Tailwind CSS Navbar component\" src=\"\"></div></label><ul tabindex=\"0\" class=\"dropdown-content menu menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow\"><li><a class=\"justify-between\">")
+		if err != nil {
+			return err
+		}
+		var_21 := `Profile`
+		_, err = templBuffer.WriteString(var_21)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" <span class=\"badge\">")
+		if err != nil {
+			return err
+		}
+		var_22 := `New`
+		_, err = templBuffer.WriteString(var_22)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</span></a></li><li><a>")
+		if err != nil {
+			return err
+		}
+		var_23 := `Settings`
+		_, err = templBuffer.WriteString(var_23)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</a></li><li><a>")
+		if err != nil {
+			return err
+		}
+		var_24 := `Logout`
+		_, err = templBuffer.WriteString(var_24)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</a></li></ul></div>")
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = templBuffer.WriteTo(w)
+		}
+		return err
+	})
+}
+
+func navBarMenu(elements []*models.TreeSpec) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_25 := templ.GetChildren(ctx)
+		if var_25 == nil {
+			var_25 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, err = templBuffer.WriteString("<ul class=\"menu menu-horizontal px-1\">")
+		if err != nil {
+			return err
+		}
+		for _, element := range elements {
+			err = navBarField(element).Render(ctx, templBuffer)
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString("</ul>")
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = templBuffer.WriteTo(w)
+		}
+		return err
+	})
+}
+
+func navBarField(element *models.TreeSpec) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_26 := templ.GetChildren(ctx)
+		if var_26 == nil {
+			var_26 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(element.Children) > 0 {
+			err = MenuDropdown(element).Render(ctx, templBuffer)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err = templBuffer.WriteString("<li><a href=\"")
+			if err != nil {
+				return err
+			}
+			var var_27 templ.SafeURL = templ.URL(element.Route)
+			_, err = templBuffer.WriteString(templ.EscapeString(string(var_27)))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\">")
+			if err != nil {
+				return err
+			}
+			var var_28 string = element.Name
+			_, err = templBuffer.WriteString(templ.EscapeString(var_28))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</a></li>")
+			if err != nil {
+				return err
+			}
+		}
+		if !templIsBuffer {
+			_, err = templBuffer.WriteTo(w)
+		}
+		return err
+	})
+}
+
+func MenuDropdown(element *models.TreeSpec) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_29 := templ.GetChildren(ctx)
+		if var_29 == nil {
+			var_29 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, err = templBuffer.WriteString("<li><details><summary>")
+		if err != nil {
+			return err
+		}
+		var var_30 string = element.Name
+		_, err = templBuffer.WriteString(templ.EscapeString(var_30))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</summary><ul class=\"bg-base-300 p-2 relative z-[100]\">")
+		if err != nil {
+			return err
+		}
+		for _, child := range element.Children {
+			_, err = templBuffer.WriteString("<li><a href=\"")
+			if err != nil {
+				return err
+			}
+			var var_31 templ.SafeURL = "/" + templ.URL(child.Route)
+			_, err = templBuffer.WriteString(templ.EscapeString(string(var_31)))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\">")
+			if err != nil {
+				return err
+			}
+			var var_32 string = child.Name
+			_, err = templBuffer.WriteString(templ.EscapeString(var_32))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</a></li>")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString("</ul></details></li>")
 		if err != nil {
 			return err
 		}

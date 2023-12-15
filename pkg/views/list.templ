@@ -1,0 +1,68 @@
+package views
+
+import "github.com/Alfagov/goDashboard/models"
+import "github.com/Alfagov/goDashboard/pkg/htmx"
+import "strconv"
+
+templ ListGroup(elements []templ.Component) {
+    <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6 lg:grid-cols-3">
+        for _, e := range elements {
+            {! e }
+        }
+    </div>
+}
+
+func TreeSpecToListElements(spec []*models.TreeSpec) []templ.Component {
+	var elements []templ.Component
+	for _, child := range spec {
+		elements = append(elements, RedirectListGroupElement(child.Name, child.Description, child.Route,
+			child.ImageRoute, nil, &models.Size{
+				Width:  300,
+				Height: 300,
+			}))
+	}
+
+	return elements
+}
+
+templ RedirectListGroupElement(title string, description string, route string, imgPath string, extraInfo map[string]string, size *models.Size) {
+
+    <a href={ templ.SafeURL(route) }>
+        <div class="card w-96 bg-base-100 shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
+            <figure><img src={ imgPath }  height={ strconv.Itoa(size.Height) } class="w-96" alt="" /></figure>
+            <div class="card-body">
+                <h2 class="card-title">
+                    { title }
+                </h2>
+                <p>{ description }</p>
+                if extraInfo != nil {
+                    <div class="card-actions justify-end">
+                        for _, v := range extraInfo {
+                            <div class="badge badge-outline">{ v }</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </a>
+}
+
+templ LocalListGroupElement(title string, description string, htmx *htmx.Htmx, imgPath string, extraInfo map[string]string, size *models.Size) {
+
+    <div hx-get={ htmx.Route.String() } hx-swap={ htmx.Swap } hx-target={ htmx.Target } class="card w-96 bg-base-100 shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl">
+        <figure><img src={ imgPath }  height={ strconv.Itoa(size.Height) } class="w-96" alt="" /></figure>
+        <div class="card-body">
+            <h2 class="card-title">
+                { title }
+            </h2>
+            <p>{ description }</p>
+            if extraInfo != nil {
+                <div class="card-actions justify-end">
+                    for _, v := range extraInfo {
+                        <div class="badge badge-outline">{ v }</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}

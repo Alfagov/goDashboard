@@ -86,7 +86,7 @@ func (d *dashboard) CreateRoutes() {
 		c.Locals("pageName", c.Params("page"))
 
 		responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children,
-			container.Render(models.NewReqWrapper(c)).Component)
+			container.Render(models.NewReqWrapper(c)).Component, "page-drawer")
 
 		c.Set("HX-Push-Url", c.Path())
 
@@ -100,7 +100,8 @@ func (d *dashboard) CreateRoutes() {
 		}
 
 		if page.Type().SuperType() == components.PageType.SuperType() {
-			responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, page.Render(nil).Component)
+			responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, page.Render(nil).Component,
+				"page-drawer")
 			c.Set("HX-Push-Url", c.Path())
 			return c.Render("", responseTemplate)
 		}
@@ -109,7 +110,7 @@ func (d *dashboard) CreateRoutes() {
 	})
 
 	d.Router.Get("/", func(c *fiber.Ctx) error {
-		responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, d.Render(nil).Component)
+		responseTemplate := IndexPage(d.name, d.image, d.GetSpec().Children, d.Render(nil).Component, "")
 		c.Set("HX-Push-Url", c.Path())
 		return c.Render("", responseTemplate)
 	})

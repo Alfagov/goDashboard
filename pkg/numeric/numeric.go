@@ -1,9 +1,9 @@
 package numeric
 
 import (
-	"github.com/Alfagov/goDashboard/internal/htmx"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
+	"github.com/Alfagov/goDashboard/pkg/htmx"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 	"github.com/google/uuid"
 	"time"

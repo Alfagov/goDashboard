@@ -110,15 +110,7 @@ func PageContainerView(page templ.Component, descriptor []*models.TreeSpec) temp
 			var_5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<main class=\"grid h-full grid-cols-4 grid-rows-6 gap-6\">")
-		if err != nil {
-			return err
-		}
-		err = Aside(descriptor).Render(ctx, templBuffer)
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("<section class=\"col-span-3 rounded p-4\"><div id=\"page-content\" class=\"grid grid-cols-3 gap-4\">")
+		_, err = templBuffer.WriteString("<div class=\"drawer\"><input id=\"page-drawer\" type=\"checkbox\" class=\"drawer-toggle\"><div class=\"drawer-content\">")
 		if err != nil {
 			return err
 		}
@@ -126,7 +118,43 @@ func PageContainerView(page templ.Component, descriptor []*models.TreeSpec) temp
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div></section></main>")
+		_, err = templBuffer.WriteString("</div><div class=\"drawer-side\"><label for=\"page-drawer\" aria-label=\"close sidebar\" class=\"drawer-overlay\"></label><ul class=\"menu p-4 w-80 min-h-full bg-base-200 text-base-content\"><p class=\"text-lg font-semibold\">")
+		if err != nil {
+			return err
+		}
+		var_6 := `Sub-Pages`
+		_, err = templBuffer.WriteString(var_6)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</p><div class=\"divider\"></div>")
+		if err != nil {
+			return err
+		}
+		for _, page := range descriptor {
+			_, err = templBuffer.WriteString("<li><button class=\"btn btn-outline text-xl m-2\" onclick=\"disposeAllCharts()\" hx-target=\"#page-content\" hx-get=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString("/" + page.Route))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\" hx-swap=\"outerHTML\" hx-select=\"#page-content\">")
+			if err != nil {
+				return err
+			}
+			var var_7 string = page.Name
+			_, err = templBuffer.WriteString(templ.EscapeString(var_7))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</button></li>")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString("</ul></div></div>")
 		if err != nil {
 			return err
 		}

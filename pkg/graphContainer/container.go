@@ -1,10 +1,10 @@
 package graphContainer
 
 import (
-	"github.com/Alfagov/goDashboard/internal/htmx"
 	"github.com/Alfagov/goDashboard/models"
 	"github.com/Alfagov/goDashboard/pkg/components"
 	"github.com/Alfagov/goDashboard/pkg/graph"
+	"github.com/Alfagov/goDashboard/pkg/htmx"
 	"github.com/Alfagov/goDashboard/pkg/widgets"
 )
 

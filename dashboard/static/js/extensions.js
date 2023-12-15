@@ -11,6 +11,7 @@ htmx.defineExtension('echarts', {
     }
 });
 
+/*
 document.addEventListener('DOMContentLoaded', () => {
     const dropdowns = document.querySelectorAll('.dropdown');
 
@@ -42,4 +43,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-});
+});*/

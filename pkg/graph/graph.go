@@ -1,11 +1,12 @@
 package graph
 
 import (
-	"github.com/Alfagov/goDashboard/internal/toolbox"
 	"github.com/Alfagov/goDashboard/models"
+	"github.com/Alfagov/goDashboard/pkg/toolbox"
 	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/google/uuid"
+	"strings"
 )
 
 type Graph interface {
@@ -33,7 +34,7 @@ type barGraphImpl struct {
 
 func NewLineGraph(name string, dataHandler func() *models.LineGraphData) Graph {
 	return &lineGraphImpl{
-		Id:          "lineGraph_" + name + "_" + uuid.New().String(),
+		Id:          "lineGraph_" + name + "_" + strings.Replace(uuid.New().String(), "-", "_", -1),
 		Name:        name,
 		dataHandler: dataHandler,
 	}
@@ -44,7 +45,7 @@ func NewBarGraph(
 	stacked bool,
 ) Graph {
 	return &barGraphImpl{
-		Id:          "barGraph_" + name + "_" + uuid.New().String(),
+		Id:          "barGraph_" + name + "_" + strings.Replace(uuid.New().String(), "-", "_", -1),
 		Name:        name,
 		stacked:     stacked,
 		dataHandler: dataHandler,

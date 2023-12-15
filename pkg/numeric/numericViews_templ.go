@@ -9,8 +9,8 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/Alfagov/goDashboard/internal/htmx"
-import "github.com/Alfagov/goDashboard/internal/layout"
+import "github.com/Alfagov/goDashboard/pkg/htmx"
+import "github.com/Alfagov/goDashboard/pkg/layout"
 
 func NumericWidget(title string, value string, unit string, unitAfter bool, htmx *htmx.Htmx, widgetLayout *layout.WidgetLayout) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -25,7 +25,7 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_2 = []any{layout.ToCSS(widgetLayout) + "bg-white p-4 rounded-lg shadow-lg"}
+		var var_2 = []any{layout.ToCSS(widgetLayout) + "stats shadow bg-base-200"}
 		err = templ.RenderCSSItems(ctx, templBuffer, var_2...)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><p class=\"text-gray-600\">")
+		_, err = templBuffer.WriteString("\"><div class=\"stat\"><div class=\"stat-title\">")
 		if err != nil {
 			return err
 		}
@@ -79,12 +79,12 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</p>")
+		_, err = templBuffer.WriteString("</div>")
 		if err != nil {
 			return err
 		}
 		if unitAfter {
-			_, err = templBuffer.WriteString("<h2 class=\"text-3xl font-bold\">")
+			_, err = templBuffer.WriteString("<div class=\"stat-value\">")
 			if err != nil {
 				return err
 			}
@@ -98,12 +98,12 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 			if err != nil {
 				return err
 			}
-			_, err = templBuffer.WriteString("</h2>")
+			_, err = templBuffer.WriteString("</div>")
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err = templBuffer.WriteString("<h2 class=\"text-3xl font-bold\">")
+			_, err = templBuffer.WriteString("<div class=\"stat-value\">")
 			if err != nil {
 				return err
 			}
@@ -117,12 +117,12 @@ func NumericWidget(title string, value string, unit string, unitAfter bool, htmx
 			if err != nil {
 				return err
 			}
-			_, err = templBuffer.WriteString("</h2>")
+			_, err = templBuffer.WriteString("</div>")
 			if err != nil {
 				return err
 			}
 		}
-		_, err = templBuffer.WriteString("</div>")
+		_, err = templBuffer.WriteString("<div class=\"stat-desc\"></div></div></div>")
 		if err != nil {
 			return err
 		}
