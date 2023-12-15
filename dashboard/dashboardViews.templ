@@ -62,7 +62,7 @@ templ NavBar(name string, dashSvg string, elements []*models.TreeSpec, drawerId 
             </label>
         }
         <div class="flex-1">
-            <a class="btn btn-ghost text-xl">{ name }</a>
+            <a href="/" class="btn btn-ghost text-xl">{ name }</a>
         </div>
         <div class="flex-none gap-2">
             @navBarMenu(elements)
@@ -130,9 +130,9 @@ templ MenuDropdown(element *models.TreeSpec) {
     <li>
         <details>
           <summary>{ element.Name }</summary>
-          <ul class="bg-base-100 p-2">
+          <ul class="bg-base-300 p-2 relative z-[100]">
             for _, child := range element.Children {
-                <li><a href={ templ.URL(child.Route) }>{ child.Name }</a></li>
+                <li><a href={ "/"+templ.URL(child.Route) }>{ child.Name }</a></li>
             }
           </ul>
         </details>

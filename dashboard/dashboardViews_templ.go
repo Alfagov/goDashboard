@@ -262,7 +262,7 @@ func NavBar(name string, dashSvg string, elements []*models.TreeSpec, drawerId s
 				return err
 			}
 		}
-		_, err = templBuffer.WriteString("<div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\">")
+		_, err = templBuffer.WriteString("<div class=\"flex-1\"><a href=\"/\" class=\"btn btn-ghost text-xl\">")
 		if err != nil {
 			return err
 		}
@@ -518,7 +518,7 @@ func MenuDropdown(element *models.TreeSpec) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</summary><ul class=\"bg-base-100 p-2\">")
+		_, err = templBuffer.WriteString("</summary><ul class=\"bg-base-300 p-2 relative z-[100]\">")
 		if err != nil {
 			return err
 		}
@@ -527,7 +527,7 @@ func MenuDropdown(element *models.TreeSpec) templ.Component {
 			if err != nil {
 				return err
 			}
-			var var_31 templ.SafeURL = templ.URL(child.Route)
+			var var_31 templ.SafeURL = "/" + templ.URL(child.Route)
 			_, err = templBuffer.WriteString(templ.EscapeString(string(var_31)))
 			if err != nil {
 				return err
