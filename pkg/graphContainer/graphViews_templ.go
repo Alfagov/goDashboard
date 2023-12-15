@@ -38,7 +38,7 @@ func GeneralGraph(id string, graph templ.Component, widgetLayout *layout.WidgetL
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><div class=\"indicator w-full\"><div class=\"indicator-item indicator-bottom\"><button hx-target=\"")
+		_, err = templBuffer.WriteString("\"><div class=\"indicator w-full\"><div class=\"indicator-item\"><button hx-target=\"")
 		if err != nil {
 			return err
 		}

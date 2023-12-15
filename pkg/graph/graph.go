@@ -34,7 +34,7 @@ type barGraphImpl struct {
 
 func NewLineGraph(name string, dataHandler func() *models.LineGraphData) Graph {
 	return &lineGraphImpl{
-		Id:          "lineGraph_" + name + "_" + uuid.New().String(),
+		Id:          "lineGraph_" + name + "_" + strings.Replace(uuid.New().String(), "-", "_", -1),
 		Name:        name,
 		dataHandler: dataHandler,
 	}
@@ -45,7 +45,7 @@ func NewBarGraph(
 	stacked bool,
 ) Graph {
 	return &barGraphImpl{
-		Id:          "barGraph_" + name + "_" + uuid.New().String(),
+		Id:          "barGraph_" + name + "_" + strings.Replace(uuid.New().String(), "-", "_", -1),
 		Name:        name,
 		stacked:     stacked,
 		dataHandler: dataHandler,
@@ -54,7 +54,7 @@ func NewBarGraph(
 
 func (bg *barGraphImpl) Encode(h int) templ.Component {
 	g := barGraphFromData(bg.dataHandler(), bg.stacked)
-	g.ChartID = strings.Replace(bg.Id, "-", "_", -1)
+	g.ChartID = bg.Id
 	if bg.tBox != nil {
 		g.SetGlobalOptions(
 			charts.WithToolboxOpts(bg.tBox.GetToolbox()),
@@ -66,7 +66,7 @@ func (bg *barGraphImpl) Encode(h int) templ.Component {
 
 func (lg *lineGraphImpl) Encode(h int) templ.Component {
 	g := lineGraphFromData(lg.dataHandler())
-	g.ChartID = strings.Replace(lg.Id, "-", "_", -1)
+	g.ChartID = lg.Id
 	if lg.tBox != nil {
 		g.SetGlobalOptions(
 			charts.WithToolboxOpts(lg.tBox.GetToolbox()),

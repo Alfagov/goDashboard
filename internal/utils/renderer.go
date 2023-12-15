@@ -93,7 +93,3 @@ func getSizedTemplate(h int) string {
 </script>
 `, "100%", h)
 }
-
-//{{- range .JSAssets.Values }}
-//   <script src="{{ . }}"></script>
-//{{- end }}
