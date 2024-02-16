@@ -14,6 +14,21 @@ func (fr *requestWrapper) BindFormRequest(v interface{}) error {
 	return fr.c.BodyParser(v)
 }
 
+func (fr *requestWrapper) AddAdditionalData(v [][]interface{}) {
+	fr.additionalData = v
+}
+
+func (fr *requestWrapper) GetAdditionalData() [][]interface{} {
+	if fr.additionalData == nil {
+		return nil
+	}
+	return fr.additionalData.([][]interface{})
+}
+
+func (fr *requestWrapper) AddHeaders(key, value string) {
+	fr.C.Set(key, value)
+}
+
 // Query retrieves the value of a query string parameter by key, with an optional default value if the key is not present.
 func (fr *requestWrapper) Query(key string, def ...string) string {
 	return fr.c.Query(key, def...)
@@ -36,13 +51,21 @@ func NewRequestWrapper(c *fiber.Ctx) RequestWrapper {
 
 // requestWrapper is an internal implementation that wraps a Fiber context to adhere to the RequestWrapper interface.
 type requestWrapper struct {
-	c *fiber.Ctx
+	C              *fiber.Ctx
+	additionalData interface{}
 }
 
 // RequestWrapper defines the interface for handling HTTP request data.
 type RequestWrapper interface {
 	// BindFormRequest binds form data from an HTTP request to the provided struct pointer.
 	BindFormRequest(v interface{}) error
+
+	// AddData adds additionalData to the request.
+	AddAdditionalData(v [][]interface{})
+	GetAdditionalData() [][]interface{}
+
+	// AddHeaders adds headers to the request
+	AddHeaders(key, value string)
 
 	// Query returns the value of a query parameter given its key, with optional default values.
 	Query(key string, def ...string) string

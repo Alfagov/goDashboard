@@ -30,8 +30,13 @@ type Form[F any] interface {
 	// It receives a components.RequestWrapper and returns an UpdateResponse.
 	setUpdateHandler(handler func(c F) *UpdateResponse)
 
+	setTableUpdateHandler(handler func(c F) ([][]interface{}, error))
+
 	// addFormFields allows adding multiple fields to the form.
 	addFormFields(field ...*models.Field)
+
+	// setTableLink sets the table link for the form.
+	setTableLink(table components.UIComponent)
 
 	// setSelectHandler sets the select handler for the field with fieldName
 	setSelectHandler(fieldName string, handler func(string) []string)
@@ -46,16 +51,18 @@ type Form[F any] interface {
 }
 
 type formImpl[F any] struct {
-	baseWidget    widgets.Widget
-	validator     *validator.Validate
-	fields        []*models.Field
-	popUpResponse bool
-	updateHandler func(c F) *UpdateResponse
-	description   string
-	spec          *models.TreeSpec
-	parent        components.UIComponent
-	children      []components.UIComponent
-	htmxOpts      htmx.HTMX
+	baseWidget         widgets.Widget
+	validator          *validator.Validate
+	fields             []*models.Field
+	tableLink          components.UIComponent
+	popUpResponse      bool
+	updateHandler      func(c F) *UpdateResponse
+	tableUpdateHandler func(c F) ([][]interface{}, error)
+	description        string
+	spec               *models.TreeSpec
+	parent             components.UIComponent
+	children           []components.UIComponent
+	htmxOpts           htmx.HTMX
 }
 
 func newForm[F any]() *formImpl[F] {

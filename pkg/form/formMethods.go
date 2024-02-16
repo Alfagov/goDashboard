@@ -18,6 +18,14 @@ func (fw *formImpl[F]) addFormFields(field ...*models.Field) {
 	fw.fields = append(fw.fields, field...)
 }
 
+func (fw *formImpl[F]) setTableLink(table components.UIComponent) {
+	fw.tableLink = table
+}
+
+func (fw *formImpl[F]) setTableUpdateHandler(handler func(c F) ([][]interface{}, error)) {
+	fw.tableUpdateHandler = handler
+}
+
 func (fw *formImpl[F]) setUpdateHandler(
 	handler func(c F) *UpdateResponse,
 
@@ -98,6 +106,20 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 			inputData, err := fw.process(req)
 			if err != nil {
 				return components.NewRenderResponse(nil, nil, err)
+			}
+
+			if fw.tableLink != nil && fw.tableUpdateHandler != nil {
+				tableData, err := fw.tableUpdateHandler(*inputData)
+				if err != nil {
+					return components.NewRenderResponse(nil, nil, err)
+				}
+
+				req.AddAdditionalData(tableData)
+
+				req.AddHeaders("HX-Retarget", "#"+fw.tableLink.Id())
+				req.AddHeaders("HX-Reswap", "outerHTML")
+
+				return components.NewRenderResponse(fw.tableLink.Render(req).Component, nil, nil)
 			}
 
 			data := fw.updateHandler(*inputData)
