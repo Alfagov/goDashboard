@@ -6,12 +6,12 @@ import (
 
 // NewReqWrapper creates a new RequestWrapper that wraps the Fiber context for handling HTTP requests.
 func NewReqWrapper(c *fiber.Ctx) RequestWrapper {
-	return &requestWrapper{c: c}
+	return &requestWrapper{C: c}
 }
 
-// BindFormRequest binds the parsed form data from the request into the provided struct pointer 'v'.
+// BindFormRequest binds the parsed form additionalData from the request into the provided struct pointer 'v'.
 func (fr *requestWrapper) BindFormRequest(v interface{}) error {
-	return fr.c.BodyParser(v)
+	return fr.C.BodyParser(v)
 }
 
 func (fr *requestWrapper) AddAdditionalData(v [][]interface{}) {
@@ -31,22 +31,22 @@ func (fr *requestWrapper) AddHeaders(key, value string) {
 
 // Query retrieves the value of a query string parameter by key, with an optional default value if the key is not present.
 func (fr *requestWrapper) Query(key string, def ...string) string {
-	return fr.c.Query(key, def...)
+	return fr.C.Query(key, def...)
 }
 
 // Method returns the HTTP method of the request, allowing handlers to adapt their behavior to the method.
 func (fr *requestWrapper) Method() string {
-	return fr.c.Method()
+	return fr.C.Method()
 }
 
 // Locals return the value of a local variable stored in the request context.
 func (fr *requestWrapper) Locals(key string) interface{} {
-	return fr.c.Locals(key)
+	return fr.C.Locals(key)
 }
 
 // NewRequestWrapper creates a new RequestWrapper that wraps the Fiber context for handling HTTP requests.
 func NewRequestWrapper(c *fiber.Ctx) RequestWrapper {
-	return &requestWrapper{c: c}
+	return &requestWrapper{C: c}
 }
 
 // requestWrapper is an internal implementation that wraps a Fiber context to adhere to the RequestWrapper interface.
@@ -55,9 +55,9 @@ type requestWrapper struct {
 	additionalData interface{}
 }
 
-// RequestWrapper defines the interface for handling HTTP request data.
+// RequestWrapper defines the interface for handling HTTP request additionalData.
 type RequestWrapper interface {
-	// BindFormRequest binds form data from an HTTP request to the provided struct pointer.
+	// BindFormRequest binds form additionalData from an HTTP request to the provided struct pointer.
 	BindFormRequest(v interface{}) error
 
 	// AddData adds additionalData to the request.

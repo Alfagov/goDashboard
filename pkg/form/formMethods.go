@@ -123,7 +123,9 @@ func (fw *formImpl[F]) Render(req models.RequestWrapper) *components.RenderRespo
 			}
 
 			data := fw.updateHandler(*inputData)
+
 			return components.NewRenderResponse(fw.updateAction(data), nil, nil)
+
 		}
 
 		if req.Query(ActionSelectFieldQuery) == ActionSelectValue {
